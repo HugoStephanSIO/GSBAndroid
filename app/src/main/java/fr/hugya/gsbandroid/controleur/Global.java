@@ -1,36 +1,68 @@
-package fr.hugya.gsbandroid;
+package fr.hugya.gsbandroid.controleur;
 
-import java.io.File;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Hashtable;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
-import android.os.Environment;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
+
+import fr.hugya.gsbandroid.R;
+import fr.hugya.gsbandroid.modele.FraisMois;
+import fr.hugya.gsbandroid.vue.MainActivity;
 
 public abstract class Global {
 
 	// tableau d'informations mémorisées
-	public static Hashtable<Integer, FraisMois> listFraisMois = new Hashtable<Integer, FraisMois>() ;
+	public static Hashtable<Integer, FraisMois> listFraisMois = new Hashtable<>() ;
 
 	// fichier contenant les informations sérialisées
-	public static final String filename = new String("save.fic") ;
+	public static final String filename = "savev1-1.fic" ;
 
+	/**
+	 * Fonction qui permet de retourner au menu appelée dans toutes les sous activity)
+	 */
+	public static void retourMenu (AppCompatActivity a) {
+		Intent monIntent = new Intent(a, MainActivity.class) ;
+		a.startActivity(monIntent) ;
+	}
+    /**
+     * Enregistrement dans la zone de texte et dans la liste de la nouvelle qte, à la date choisie
+     */
+    public static void enregNewQte(EditText txtRepas, int annee, int mois, int qte, String typeFrais) {
+        // enregistrement dans la zone de texte
+        txtRepas.setText(String.valueOf(qte)) ;
+        // enregistrement dans la liste
+        int key = annee*100+mois ;
+        if (!listFraisMois.containsKey(key)) {
+            // creation du mois et de l'annee s'ils n'existent pas déjà
+            listFraisMois.put(key, new FraisMois(annee, mois)) ;
+        }
+        switch (typeFrais) {
+            case "repas" :
+                listFraisMois.get(key).setRepas(qte);
+                break ;
+            case "nuit" :
+                listFraisMois.get(key).setNuitee(qte);
+                break ;
+            case "km" :
+                listFraisMois.get(key).setKm(qte);
+                break ;
+            case "etape" :
+                listFraisMois.get(key).setEtape(qte);
+                break ;
+        }
+    }
 	/**
 	 * Modification de l'affichage de la date (juste le mois et l'année, sans le jour)
 	 */
 	public static void changeAfficheDate(DatePicker datePicker) {
 		//try {
-				DatePicker dp_mes = (DatePicker) datePicker;
+				DatePicker dp_mes = datePicker;
 
 				int year    = dp_mes.getYear();
 				int month   = dp_mes.getMonth();
@@ -85,7 +117,12 @@ public abstract class Global {
 							} catch (IllegalAccessException e) {
 								e.printStackTrace();
 							}
-							((View) dayPicker).setVisibility(View.GONE);
+							try {
+                                assert ((View) dayPicker) != null;
+                                ((View) dayPicker).setVisibility(View.GONE);
+                            } catch (NullPointerException e) {
+                                e.printStackTrace();
+                            }
 						}
 
 						if(field.getName().equals("mMonthPicker") || field.getName().equals("mMonthSpinner"))
@@ -97,7 +134,12 @@ public abstract class Global {
 							} catch (IllegalAccessException e) {
 								e.printStackTrace();
 							}
-							((View) monthPicker).setVisibility(View.VISIBLE);
+		                    try {
+                                assert ((View) monthPicker) != null;
+                                ((View) monthPicker).setVisibility(View.VISIBLE);
+                            } catch (NullPointerException e) {
+                                e.printStackTrace();
+                            }
 						}
 
 						if(field.getName().equals("mYearPicker") || field.getName().equals("mYearSpinner"))
@@ -109,7 +151,12 @@ public abstract class Global {
 							} catch (IllegalAccessException e) {
 								e.printStackTrace();
 							}
-							((View) yearPicker).setVisibility(View.VISIBLE);
+                            try {
+                                assert ((View) yearPicker) != null;
+                                ((View) yearPicker).setVisibility(View.VISIBLE);
+                            } catch (NullPointerException e) {
+                                e.printStackTrace();
+                            }
 						}
 					}
 				}

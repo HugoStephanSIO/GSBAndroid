@@ -1,4 +1,4 @@
-package fr.hugya.gsbandroid;
+package fr.hugya.gsbandroid.modele;
 
 import java.io.Serializable;
 

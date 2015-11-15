@@ -12,6 +12,7 @@
         android:gravity="right"
         android:paddingLeft="2dp"
         android:paddingRight="2dp"
+        android:layout_gravity="center"
         android:textSize="20sp" />
 
     <TextView
@@ -21,6 +22,7 @@
         android:layout_weight="0.5"
         android:paddingLeft="2dp"
         android:paddingRight="2dp"
+        android:layout_gravity="center"
         android:text=":"
         android:textSize="20sp" />
 
@@ -32,6 +34,7 @@
         android:gravity="right"
         android:paddingLeft="2dp"
         android:paddingRight="2dp"
+        android:layout_gravity="center"
         android:textSize="20sp" />
 
     <TextView
@@ -42,6 +45,7 @@
         android:paddingLeft="2dp"
         android:paddingRight="2dp"
         android:text="€"
+        android:layout_gravity="center"
         android:textSize="20sp" />
 
     <TextView
@@ -51,6 +55,17 @@
         android:layout_weight="3.5"
         android:paddingLeft="4dp"
         android:paddingRight="2dp"
+        android:layout_gravity="center"
         android:textSize="20sp" />
+
+    <ImageView
+        android:id="@+id/imgListSuppr"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_weight="1"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:textSize="20sp"
+        android:src="@drawable/suppr" />
 
 </LinearLayout>

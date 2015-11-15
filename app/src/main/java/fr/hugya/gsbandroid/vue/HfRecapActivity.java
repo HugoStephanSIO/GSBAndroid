@@ -1,19 +1,20 @@
-package fr.hugya.gsbandroid;
+package fr.hugya.gsbandroid.vue;
 
 import java.util.ArrayList;
 import android.os.Bundle;
-import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.DatePicker.OnDateChangedListener;
-import android.content.Intent;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.ListView;
+
+import fr.hugya.gsbandroid.modele.FraisHf;
+import fr.hugya.gsbandroid.modele.FraisHfAdapter;
+import fr.hugya.gsbandroid.controleur.Global;
+import fr.hugya.gsbandroid.R;
+import fr.hugya.gsbandroid.modele.Serializer;
 
 public class HfRecapActivity extends AppCompatActivity {
 
@@ -45,11 +46,11 @@ public class HfRecapActivity extends AppCompatActivity {
 		Integer mois = ((DatePicker)findViewById(R.id.datHfRecap)).getMonth() + 1 ;
 		// récupération des frais HF pour cette date
 		Integer key = annee*100 + mois ;
-		ArrayList<FraisHf> liste = null ;
+		ArrayList<FraisHf> liste ;
 		if (Global.listFraisMois.containsKey(key)) {
 			liste = Global.listFraisMois.get(key).getLesFraisHf() ;
 		}else{
-			liste = new ArrayList<FraisHf>() ;
+			liste = new ArrayList<>() ;
 			// insertion dans la listview
 		}
 		ListView listView = (ListView)findViewById(R.id.lstHfRecap) ;
@@ -61,9 +62,10 @@ public class HfRecapActivity extends AppCompatActivity {
 	 * Sur la selection de l'image : retour au menu principal
 	 */
     private void imgReturn_clic() {
-    	((ImageView)findViewById(R.id.imgHfRecapReturn)).setOnClickListener(new ImageView.OnClickListener() {
+    	findViewById(R.id.imgHfRecapReturn).setOnClickListener(new ImageView.OnClickListener() {
     		public void onClick(View v) {
-    			retourActivityPrincipale() ;    		
+                Serializer.serialize(Global.filename, Global.listFraisMois, HfRecapActivity.this) ;
+    			Global.retourMenu(HfRecapActivity.this);
     		}
     	}) ;
     }
@@ -80,14 +82,4 @@ public class HfRecapActivity extends AppCompatActivity {
 			}
     	});       	
     }
-    
-    
-
-	/**
-	 * Retour � l'activit� principale (le menu)
-	 */
-	private void retourActivityPrincipale() {
-		Intent intent = new Intent(HfRecapActivity.this, MainActivity.class) ;
-		startActivity(intent) ;   					
-	}
 }

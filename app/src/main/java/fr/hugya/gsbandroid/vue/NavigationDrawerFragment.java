@@ -1,4 +1,4 @@
-package fr.hugya.gsbandroid;
+package fr.hugya.gsbandroid.vue;
 
 import android.support.v7.app.AppCompatActivity;
 import android.app.Activity;
@@ -21,6 +21,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import fr.hugya.gsbandroid.R;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.

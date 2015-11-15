@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".KmActivity">
+    tools:context=".EtapeActivity">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -21,11 +21,11 @@
             android:padding="5dp" >
 
             <ImageView
-                android:id="@+id/imgKmReturn"
+                android:id="@+id/imgEtapeReturn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/frais_km" />
+                android:src="@drawable/frais_etape" />
 
         </LinearLayout>
 
@@ -41,7 +41,7 @@
             <DatePicker
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/datKm"
+                android:id="@+id/datEtape"
                 android:datePickerMode="spinner"
                 android:calendarViewShown="false" />
         </LinearLayout>
@@ -59,11 +59,11 @@
                 android:paddingLeft="10dp" >
 
                 <TextView
-                    android:id="@+id/lblKm"
+                    android:id="@+id/lblEtape"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="Km"
+                    android:text="Etapes"
                     android:textAppearance="?android:attr/textAppearanceLarge" />
 
             </LinearLayout>
@@ -75,7 +75,7 @@
                 android:paddingRight="10dp" >
 
                 <EditText
-                    android:id="@+id/txtKm"
+                    android:id="@+id/txtEtape"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -97,14 +97,14 @@
                 android:paddingLeft="5dp" >
 
                 <Button
-                    android:id="@+id/cmdKmPlus"
+                    android:id="@+id/cmdEtapePlus"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
                     android:text="+"
                     android:textSize="20sp" />
 
                 <Button
-                    android:id="@+id/cmdKmMoins"
+                    android:id="@+id/cmdEtapeMoins"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
                     android:text="-"
@@ -121,7 +121,7 @@
             android:paddingTop="20dp" >
 
             <Button
-                android:id="@+id/cmdKmValider"
+                android:id="@+id/cmdEtapeValider"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

@@ -1,16 +1,17 @@
-package fr.hugya.gsbandroid;
+package fr.hugya.gsbandroid.modele;
 
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.BaseAdapter;
+
+import fr.hugya.gsbandroid.R;
+import fr.hugya.gsbandroid.controleur.Global;
 
 public class FraisHfAdapter extends BaseAdapter {
 
@@ -63,6 +64,7 @@ public class FraisHfAdapter extends BaseAdapter {
 		TextView txtListJour ;
 		TextView txtListMontant ;
 		TextView txtListMotif ;
+        ImageView imgSuppr ;
 	}
 	
 	/**
@@ -74,9 +76,11 @@ public class FraisHfAdapter extends BaseAdapter {
 		if (convertView == null) {
 			holder = new ViewHolder() ;
 			convertView = inflater.inflate(R.layout.layout_liste, null) ;
+            // Affichage des différents éléments dans la liste
 			holder.txtListJour = (TextView)convertView.findViewById(R.id.txtListJour) ;
 			holder.txtListMontant = (TextView)convertView.findViewById(R.id.txtListMontant) ;
 			holder.txtListMotif = (TextView)convertView.findViewById(R.id.txtListMotif) ;
+            holder.imgSuppr = (ImageView)convertView.findViewById(R.id.imgListSuppr) ;
 			convertView.setTag(holder) ;
 		}else{
 			holder = (ViewHolder)convertView.getTag();
@@ -84,7 +88,15 @@ public class FraisHfAdapter extends BaseAdapter {
 		holder.txtListJour.setText(lesFrais.get(index).getJour().toString()) ;
 		holder.txtListMontant.setText(lesFrais.get(index).getMontant().toString()) ;
 		holder.txtListMotif.setText(lesFrais.get(index).getMotif()) ;
+        holder.imgSuppr.setTag(index) ;
+        holder.imgSuppr.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                int index = (Integer)v.getTag() ;
+                lesFrais.remove(index) ;
+                Global.listFraisMois.get(key).setLesFraisHf(lesFrais) ;
+                notifyDataSetChanged();
+            }
+        });
 		return convertView ;
 	}
-	
 }

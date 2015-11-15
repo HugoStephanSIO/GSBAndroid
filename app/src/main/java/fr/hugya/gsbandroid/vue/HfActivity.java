@@ -1,8 +1,6 @@
-package fr.hugya.gsbandroid;
+package fr.hugya.gsbandroid.vue;
 
 import android.os.Bundle;
-import android.app.Activity;
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.View;
@@ -10,6 +8,11 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+
+import fr.hugya.gsbandroid.modele.FraisMois;
+import fr.hugya.gsbandroid.controleur.Global;
+import fr.hugya.gsbandroid.R;
+import fr.hugya.gsbandroid.modele.Serializer;
 
 public class HfActivity extends AppCompatActivity {
 
@@ -35,9 +38,9 @@ public class HfActivity extends AppCompatActivity {
 	 * Sur la selection de l'image : retour au menu principal
 	 */
     private void imgReturn_clic() {
-    	((ImageView)findViewById(R.id.imgHfReturn)).setOnClickListener(new ImageView.OnClickListener() {
+    	findViewById(R.id.imgHfReturn).setOnClickListener(new ImageView.OnClickListener() {
     		public void onClick(View v) {
-    			retourActivityPrincipale() ;    		
+    			Global.retourMenu(HfActivity.this) ;
     		}
     	}) ;
     }
@@ -46,11 +49,11 @@ public class HfActivity extends AppCompatActivity {
      * Sur le clic du bouton ajouter : enregistrement dans la liste et sérialisation
      */
     private void cmdAjouter_clic() {
-    	((Button)findViewById(R.id.cmdHfAjouter)).setOnClickListener(new Button.OnClickListener() {
+    	findViewById(R.id.cmdHfAjouter).setOnClickListener(new Button.OnClickListener() {
     		public void onClick(View v) {
     			enregListe() ;
     			Serializer.serialize(Global.filename, Global.listFraisMois, HfActivity.this) ;
-    			retourActivityPrincipale() ;    		
+    			Global.retourMenu(HfActivity.this) ;
     		}
     	}) ;    	
     }
@@ -72,13 +75,5 @@ public class HfActivity extends AppCompatActivity {
 			Global.listFraisMois.put(key, new FraisMois(annee, mois)) ;
 		}
 		Global.listFraisMois.get(key).addFraisHf(montant, motif, jour) ;		
-	}
-
-	/**
-	 * Retour � l'activit� principale (le menu)
-	 */
-	private void retourActivityPrincipale() {
-		Intent intent = new Intent(HfActivity.this, MainActivity.class) ;
-		startActivity(intent) ;   					
 	}
 }

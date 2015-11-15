@@ -1,7 +1,9 @@
-package fr.hugya.gsbandroid;
+package fr.hugya.gsbandroid.modele;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+
+import fr.hugya.gsbandroid.modele.FraisHf;
 
 /**
  * Classe métier contenant les informations des frais d'un mois
@@ -24,7 +26,7 @@ public class FraisMois implements Serializable {
 		this.km = 0 ;
 		this.nuitee = 0 ;
 		this.repas = 0 ;
-		lesFraisHf = new ArrayList<FraisHf>() ;
+		lesFraisHf = new ArrayList<>() ;
 	}
 
 	/**
@@ -95,5 +97,7 @@ public class FraisMois implements Serializable {
 	public ArrayList<FraisHf> getLesFraisHf() {
 		return lesFraisHf ;
 	}
+
+	public void setLesFraisHf(ArrayList<FraisHf> l) { lesFraisHf = l ;} ;
 	
 }
