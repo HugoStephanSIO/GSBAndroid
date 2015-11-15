@@ -76,7 +76,9 @@ public class EtapeActivity extends AppCompatActivity {
     private void cmdValider_clic() {
         findViewById(R.id.cmdEtapeValider).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
+                // Enregistrement de l'état des frais
                 Serializer.serialize(Global.filename, Global.listFraisMois, EtapeActivity.this) ;
+                // Signalement de l'enregistrement
                 Toast.makeText(EtapeActivity.this,"Etapes enregistrées",Toast.LENGTH_SHORT).show () ;
                 Global.retourMenu(EtapeActivity.this);
             }
@@ -88,6 +90,7 @@ public class EtapeActivity extends AppCompatActivity {
     private void cmdPlus_clic() {
         findViewById(R.id.cmdEtapePlus).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
+                // On augmente le nombre d'étape en local et on l'enregistre dans l'état des frais
                 qte+=1 ;
                 Global.enregNewQte(((EditText) findViewById(R.id.txtEtape)), annee, mois, qte, "etape");
             }
@@ -99,7 +102,7 @@ public class EtapeActivity extends AppCompatActivity {
     private void cmdMoins_clic() {
         findViewById(R.id.cmdEtapeMoins).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                qte = Math.max(0, qte-1) ; // suppression de 1 si possible
+                qte = Math.max(0, qte-1) ; // suppression de 1 si possible et enregistrement
                 Global.enregNewQte(((EditText) findViewById(R.id.txtEtape)), annee, mois, qte, "etape");
             }
         }) ;

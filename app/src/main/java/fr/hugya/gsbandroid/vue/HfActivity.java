@@ -14,8 +14,17 @@ import fr.hugya.gsbandroid.controleur.Global;
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.modele.Serializer;
 
+/**
+ * Classe gérant l'activité la saisie de frais hors forfaits
+ * @author Hugo Stéphan
+ */
 public class HfActivity extends AppCompatActivity {
-
+    // FONCTIONS REDEFINIES :
+    // ----------------------
+    /**
+     * Fonction appelée au lancement de l'activity, réglages et lancement des fonctions événementielles
+     * @param savedInstanceState
+     */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -26,7 +35,6 @@ public class HfActivity extends AppCompatActivity {
 		imgReturn_clic() ;
 		cmdAjouter_clic() ;
 	}
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -34,30 +42,35 @@ public class HfActivity extends AppCompatActivity {
 		return true;
 	}
 
-	/**
-	 * Sur la selection de l'image : retour au menu principal
-	 */
+
+    // FONCTIONS EVENEMENTIELLES
+    // -------------------------
+    /**
+     * Fonction événementielle appelée en cas de clic sur l'image pour retourner au menu
+     */
     private void imgReturn_clic() {
     	findViewById(R.id.imgHfReturn).setOnClickListener(new ImageView.OnClickListener() {
-    		public void onClick(View v) {
-    			Global.retourMenu(HfActivity.this) ;
-    		}
-    	}) ;
+            public void onClick(View v) {
+                Global.retourMenu(HfActivity.this);
+            }
+        }) ;
     }
-
     /**
-     * Sur le clic du bouton ajouter : enregistrement dans la liste et sérialisation
+     * Fonction événementelle appelée en cas de clic sur le bouton ajouter : enregistrement dans la liste et sérialisation
      */
     private void cmdAjouter_clic() {
     	findViewById(R.id.cmdHfAjouter).setOnClickListener(new Button.OnClickListener() {
-    		public void onClick(View v) {
-    			enregListe() ;
-    			Serializer.serialize(Global.filename, Global.listFraisMois, HfActivity.this) ;
-    			Global.retourMenu(HfActivity.this) ;
-    		}
-    	}) ;    	
+            public void onClick(View v) {
+                enregListe();
+                Serializer.serialize(Global.filename, Global.listFraisMois, HfActivity.this);
+                Global.retourMenu(HfActivity.this);
+            }
+        }) ;
     }
-    
+
+
+    // FONCTIONS OUTILS/AUTRES :
+    // -------------------------
 	/**
 	 * Enregistrement dans la liste du nouveau frais hors forfait
 	 */

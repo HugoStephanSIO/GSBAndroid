@@ -15,11 +15,15 @@ import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.modele.FraisMois;
 import fr.hugya.gsbandroid.vue.MainActivity;
 
+/**
+ * Classe abstraite contenant diverses fonctions utilitaires
+ * @author Hugo Stéphan
+ */
 public abstract class Global {
-
+    // PROPRIETEES :
+    // -------------
 	// tableau d'informations mémorisées
 	public static Hashtable<Integer, FraisMois> listFraisMois = new Hashtable<>() ;
-
 	// fichier contenant les informations sérialisées
 	public static final String filename = "savev1-1.fic" ;
 
@@ -42,6 +46,7 @@ public abstract class Global {
             // creation du mois et de l'annee s'ils n'existent pas déjà
             listFraisMois.put(key, new FraisMois(annee, mois)) ;
         }
+        // Switch selon le type de frais à enregistrer
         switch (typeFrais) {
             case "repas" :
                 listFraisMois.get(key).setRepas(qte);

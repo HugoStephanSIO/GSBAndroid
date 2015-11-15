@@ -13,8 +13,13 @@ import android.widget.BaseAdapter;
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.controleur.Global;
 
+/**
+ * Adapter pour la liste des frais hors forfait d'un mois donné
+ * @author Hugo Stéphan
+ */
 public class FraisHfAdapter extends BaseAdapter {
-
+    // PROPRIETEES :
+    // -------------
 	ArrayList<FraisHf> lesFrais ; // liste des frais du mois
 	LayoutInflater inflater ;
 	Integer key ;  // annee et mois (clé dans la liste)
@@ -76,7 +81,7 @@ public class FraisHfAdapter extends BaseAdapter {
 		if (convertView == null) {
 			holder = new ViewHolder() ;
 			convertView = inflater.inflate(R.layout.layout_liste, null) ;
-            // Affichage des différents éléments dans la liste
+            // Création éventuelle des différents éléments dans la liste
 			holder.txtListJour = (TextView)convertView.findViewById(R.id.txtListJour) ;
 			holder.txtListMontant = (TextView)convertView.findViewById(R.id.txtListMontant) ;
 			holder.txtListMotif = (TextView)convertView.findViewById(R.id.txtListMotif) ;
@@ -85,10 +90,13 @@ public class FraisHfAdapter extends BaseAdapter {
 		}else{
 			holder = (ViewHolder)convertView.getTag();
 		}
+        // Remplissage des éléments de la liste
 		holder.txtListJour.setText(lesFrais.get(index).getJour().toString()) ;
 		holder.txtListMontant.setText(lesFrais.get(index).getMontant().toString()) ;
 		holder.txtListMotif.setText(lesFrais.get(index).getMotif()) ;
         holder.imgSuppr.setTag(index) ;
+
+        // Fonction événementielle appelée en cas de clique sur le bouton supprimer
         holder.imgSuppr.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 int index = (Integer)v.getTag() ;
