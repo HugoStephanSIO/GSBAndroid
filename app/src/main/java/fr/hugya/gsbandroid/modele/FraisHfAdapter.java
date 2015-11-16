@@ -11,7 +11,7 @@ import android.widget.TextView;
 import android.widget.BaseAdapter;
 
 import fr.hugya.gsbandroid.R;
-import fr.hugya.gsbandroid.controleur.Global;
+import fr.hugya.gsbandroid.controleur.Controleur;
 
 /**
  * Adapter pour la liste des frais hors forfait d'un mois donné
@@ -24,6 +24,7 @@ public class FraisHfAdapter extends BaseAdapter {
 	LayoutInflater inflater ;
 	Integer key ;  // annee et mois (clé dans la liste)
 	Context context ; // contexte pour gérer la sérialisation
+	Controleur controle ;
 	
 	/**
 	 * Constructeur de l'adapter pour valoriser les propriétés
@@ -31,11 +32,12 @@ public class FraisHfAdapter extends BaseAdapter {
 	 * @param lesFrais
 	 * @param key
 	 */
-	public FraisHfAdapter(Context context, ArrayList<FraisHf> lesFrais, Integer key) {
+	public FraisHfAdapter(Context context, ArrayList<FraisHf> lesFrais, Integer key, Controleur ctrl) {
 		inflater = LayoutInflater.from(context) ;
 		this.lesFrais = lesFrais ;
 		this.key = key ;
 		this.context = context ;
+		this.controle = ctrl ;
 	}
 	
 	/**
@@ -96,12 +98,12 @@ public class FraisHfAdapter extends BaseAdapter {
 		holder.txtListMotif.setText(lesFrais.get(index).getMotif()) ;
         holder.imgSuppr.setTag(index) ;
 
-        // Fonction événementielle appelée en cas de clique sur le bouton supprimer
+        // Fonction événementielle appelée en cas de clic sur le bouton supprimer
         holder.imgSuppr.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 int index = (Integer)v.getTag() ;
                 lesFrais.remove(index) ;
-                Global.listFraisMois.get(key).setLesFraisHf(lesFrais) ;
+                controle.getListFraisMois().get(key).setLesFraisHf(lesFrais) ;
                 notifyDataSetChanged();
             }
         });

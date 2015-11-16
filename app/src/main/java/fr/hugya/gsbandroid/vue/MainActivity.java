@@ -16,7 +16,7 @@ import android.view.View;
 import android.widget.Button;
 
 import fr.hugya.gsbandroid.modele.FraisMois;
-import fr.hugya.gsbandroid.controleur.Global;
+import fr.hugya.gsbandroid.controleur.Controleur;
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.modele.Serializer;
 
@@ -25,6 +25,7 @@ import fr.hugya.gsbandroid.modele.Serializer;
  * @author Hugo Stéphan
  */
 public class MainActivity extends AppCompatActivity {
+    Controleur controle ;
     // FONCTIONS REDEFINIES :
     // ----------------------
     /**
@@ -36,7 +37,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // récupération des informations sérialisées
-        recupSerialize() ;
+        Intent monIntent = getIntent () ;
+        if (monIntent.getSerializableExtra("ctrl")!= null)
+        {
+            controle = (Controleur)monIntent.getSerializableExtra("ctrl") ;
+        }
+        else
+        {
+            controle = new Controleur(MainActivity.this);
+        }
         // chargement des fonctions événementielles
         cmdMenu_clic(((Button)findViewById(R.id.cmdKm)), KmActivity.class) ;
         cmdMenu_clic(((Button)findViewById(R.id.cmdHf)), HfActivity.class) ;
@@ -64,7 +73,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // ouvre l'activité
                 Intent intent = new Intent(MainActivity.this, classe);
+                intent.putExtra("ctrl", controle) ;
                 startActivity(intent);
+                finish() ;
             }
         }) ;
     }
@@ -87,12 +98,12 @@ public class MainActivity extends AppCompatActivity {
     // -------------------------
     /**
      * Récupére la sérialisation si elle existe
-     */
+     *//*
     private void recupSerialize() {
         Global.listFraisMois = (Hashtable<Integer, FraisMois>) Serializer.deSerialize(Global.filename, MainActivity.this) ;
         // si rien n'a été récupéré, il faut créer la liste
         if (Global.listFraisMois==null) {
             Global.listFraisMois = new Hashtable<>() ;
         }
-    }
+    }*/
 }

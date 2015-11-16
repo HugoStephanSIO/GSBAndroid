@@ -8,17 +8,18 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import fr.hugya.gsbandroid.modele.FraisMois;
-import fr.hugya.gsbandroid.controleur.Global;
+import fr.hugya.gsbandroid.controleur.Controleur;
 import fr.hugya.gsbandroid.R;
-import fr.hugya.gsbandroid.modele.Serializer;
 
 /**
  * Classe gérant l'activité la saisie de frais hors forfaits
  * @author Hugo Stéphan
  */
 public class HfActivity extends AppCompatActivity {
+    private Controleur controle ;
     // FONCTIONS REDEFINIES :
     // ----------------------
     /**
@@ -29,6 +30,7 @@ public class HfActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_hf);
+        controle = (Controleur)getIntent().getSerializableExtra("ctrl") ;
 		// mise à 0 du montant
 		((EditText)findViewById(R.id.txtHf)).setText("0") ;
         // chargement des méthodes événementielles
@@ -51,7 +53,8 @@ public class HfActivity extends AppCompatActivity {
     private void imgReturn_clic() {
     	findViewById(R.id.imgHfReturn).setOnClickListener(new ImageView.OnClickListener() {
             public void onClick(View v) {
-                Global.retourMenu(HfActivity.this);
+				Toast.makeText(HfActivity.this, "Frais hors forfait enregistré", Toast.LENGTH_SHORT).show() ;
+                controle.retourMenu(HfActivity.this);
             }
         }) ;
     }
@@ -62,8 +65,9 @@ public class HfActivity extends AppCompatActivity {
     	findViewById(R.id.cmdHfAjouter).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 enregListe();
-                Serializer.serialize(Global.filename, Global.listFraisMois, HfActivity.this);
-                Global.retourMenu(HfActivity.this);
+				Toast.makeText(HfActivity.this, "Frais hors forfait enregistré", Toast.LENGTH_SHORT).show() ;
+                controle.enregistrerLocal(HfActivity.this);
+                controle.retourMenu(HfActivity.this);
             }
         }) ;
     }
@@ -83,10 +87,10 @@ public class HfActivity extends AppCompatActivity {
 		String motif = ((EditText)findViewById(R.id.txtHfMotif)).getText().toString() ;
 		// enregistrement dans la liste
 		Integer key = annee*100+mois ;
-		if (!Global.listFraisMois.containsKey(key)) {
+		if (!controle.getListFraisMois().containsKey(key)) {
 			// creation du mois et de l'annee s'ils n'existent pas déjà
-			Global.listFraisMois.put(key, new FraisMois(annee, mois)) ;
+			controle.getListFraisMois().put(key, new FraisMois(annee, mois)) ;
 		}
-		Global.listFraisMois.get(key).addFraisHf(montant, motif, jour) ;		
+		controle.getListFraisMois().get(key).addFraisHf(montant, motif, jour) ;
 	}
 }

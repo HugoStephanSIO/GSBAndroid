@@ -12,18 +12,20 @@ import android.widget.ListView;
 
 import fr.hugya.gsbandroid.modele.FraisHf;
 import fr.hugya.gsbandroid.modele.FraisHfAdapter;
-import fr.hugya.gsbandroid.controleur.Global;
+import fr.hugya.gsbandroid.controleur.Controleur ;
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.modele.Serializer;
 
 public class HfRecapActivity extends AppCompatActivity {
+	private Controleur controle ;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_hf_recap);
+		controle = (Controleur)getIntent().getSerializableExtra("ctrl") ;
 		// modification de l'affichage du DatePicker
-		Global.changeAfficheDate((DatePicker) findViewById(R.id.datHfRecap)) ;
+		controle.changeAfficheDate((DatePicker) findViewById(R.id.datHfRecap)) ;
 		// valorisation des propriétés
 		afficheListe() ;
         // chargement des méthodes événementielles
@@ -47,14 +49,14 @@ public class HfRecapActivity extends AppCompatActivity {
 		// récupération des frais HF pour cette date
 		Integer key = annee*100 + mois ;
 		ArrayList<FraisHf> liste ;
-		if (Global.listFraisMois.containsKey(key)) {
-			liste = Global.listFraisMois.get(key).getLesFraisHf() ;
+		if (controle.getListFraisMois().containsKey(key)) {
+			liste = controle.getListFraisMois().get(key).getLesFraisHf() ;
 		}else{
 			liste = new ArrayList<>() ;
 			// insertion dans la listview
 		}
 		ListView listView = (ListView)findViewById(R.id.lstHfRecap) ;
-		FraisHfAdapter adapter = new FraisHfAdapter(HfRecapActivity.this, liste, key) ;
+		FraisHfAdapter adapter = new FraisHfAdapter(HfRecapActivity.this, liste, key, controle) ;
 		listView.setAdapter(adapter) ;
 	}
 	
@@ -64,8 +66,8 @@ public class HfRecapActivity extends AppCompatActivity {
     private void imgReturn_clic() {
     	findViewById(R.id.imgHfRecapReturn).setOnClickListener(new ImageView.OnClickListener() {
     		public void onClick(View v) {
-                Serializer.serialize(Global.filename, Global.listFraisMois, HfRecapActivity.this) ;
-    			Global.retourMenu(HfRecapActivity.this);
+                controle.enregistrerLocal(HfRecapActivity.this) ;
+    			controle.retourMenu(HfRecapActivity.this);
     		}
     	}) ;
     }

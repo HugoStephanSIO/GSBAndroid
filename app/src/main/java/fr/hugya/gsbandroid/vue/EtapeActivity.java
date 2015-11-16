@@ -1,5 +1,6 @@
 package fr.hugya.gsbandroid.vue;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -11,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import fr.hugya.gsbandroid.R;
-import fr.hugya.gsbandroid.controleur.Global;
+import fr.hugya.gsbandroid.controleur.Controleur;
 import fr.hugya.gsbandroid.modele.Serializer;
 
 /**
@@ -25,7 +26,7 @@ public class EtapeActivity extends AppCompatActivity {
     private int annee ;
     private int mois ;
     private int qte ;
-    private int wt;
+    private Controleur controle ;
 
 
     // FONCTIONS REDEFINIES :
@@ -38,12 +39,14 @@ public class EtapeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_etape);
-        // modification de l'affichage du DatePicker
-        Global.changeAfficheDate((DatePicker) findViewById(R.id.datEtape)) ;
-        // valorisation des propriétés
+        // Récupération du controleur
+        controle = (Controleur)getIntent().getSerializableExtra("ctrl") ;
+        // Modification de l'affichage du DatePicker
+        controle.changeAfficheDate((DatePicker) findViewById(R.id.datEtape)) ;
+        // Valorisation des propriétés
         valoriseProprietes() ;
         ((EditText)findViewById(R.id.txtEtape)).setKeyListener(null);
-        // chargement des méthodes événementielles
+        // Chargement des méthodes événementielles
         imgReturn_clic() ;
         cmdValider_clic() ;
         cmdPlus_clic() ;
@@ -66,7 +69,7 @@ public class EtapeActivity extends AppCompatActivity {
     private void imgReturn_clic() {
         findViewById(R.id.imgEtapeReturn).setOnClickListener(new ImageView.OnClickListener() {
             public void onClick(View v) {
-                Global.retourMenu(EtapeActivity.this);
+                controle.retourMenu(EtapeActivity.this);
             }
         }) ;
     }
@@ -76,11 +79,10 @@ public class EtapeActivity extends AppCompatActivity {
     private void cmdValider_clic() {
         findViewById(R.id.cmdEtapeValider).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                // Enregistrement de l'état des frais
-                Serializer.serialize(Global.filename, Global.listFraisMois, EtapeActivity.this) ;
                 // Signalement de l'enregistrement
+                controle.enregistrerLocal(EtapeActivity.this);
                 Toast.makeText(EtapeActivity.this,"Etapes enregistrées",Toast.LENGTH_SHORT).show () ;
-                Global.retourMenu(EtapeActivity.this);
+                controle.retourMenu(EtapeActivity.this);
             }
         }) ;
     }
@@ -92,7 +94,7 @@ public class EtapeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // On augmente le nombre d'étape en local et on l'enregistre dans l'état des frais
                 qte+=1 ;
-                Global.enregNewQte(((EditText) findViewById(R.id.txtEtape)), annee, mois, qte, "etape");
+                controle.enregNewQte(((EditText) findViewById(R.id.txtEtape)), annee, mois, qte, "etape");
             }
         }) ;
     }
@@ -103,7 +105,7 @@ public class EtapeActivity extends AppCompatActivity {
         findViewById(R.id.cmdEtapeMoins).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 qte = Math.max(0, qte-1) ; // suppression de 1 si possible et enregistrement
-                Global.enregNewQte(((EditText) findViewById(R.id.txtEtape)), annee, mois, qte, "etape");
+                controle.enregNewQte(((EditText) findViewById(R.id.txtEtape)), annee, mois, qte, "etape");
             }
         }) ;
     }
@@ -131,8 +133,8 @@ public class EtapeActivity extends AppCompatActivity {
         // récupération de la qte correspondant au mois actuel
         qte = 0 ;
         int key = annee*100+mois ;
-        if (Global.listFraisMois.containsKey(key)) {
-            qte = Global.listFraisMois.get(key).getEtape() ;
+        if (controle.getListFraisMois().containsKey(key)) {
+            qte = controle.getListFraisMois().get(key).getEtape() ;
         }
         ((EditText)findViewById(R.id.txtEtape)).setText(String.valueOf(qte)) ;
     }

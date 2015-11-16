@@ -10,7 +10,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import fr.hugya.gsbandroid.controleur.Global;
+import fr.hugya.gsbandroid.controleur.Controleur;
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.modele.Serializer;
 
@@ -25,6 +25,7 @@ public class RepasActivity extends AppCompatActivity {
     private int annee ;
     private int mois ;
     private int qte ;
+    private Controleur controle ;
 
 
     // FONCTIONS REDEFINIES :
@@ -38,7 +39,8 @@ public class RepasActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_repas);
         // modification de l'affichage du DatePicker
-        Global.changeAfficheDate((DatePicker) findViewById(R.id.datRepas)) ;
+        controle = (Controleur)getIntent().getSerializableExtra("ctrl") ;
+        controle.changeAfficheDate((DatePicker) findViewById(R.id.datRepas)) ;
         // valorisation du champ d'entrée de texte et impossibilité de l'éditer directement
         valoriseProprietes();
         ((EditText)findViewById(R.id.txtRepas)).setKeyListener(null);
@@ -65,7 +67,7 @@ public class RepasActivity extends AppCompatActivity {
     private void imgReturn_clic() {
         findViewById(R.id.imgRepasReturn).setOnClickListener(new ImageView.OnClickListener() {
             public void onClick(View v) {
-                Global.retourMenu(RepasActivity.this);
+                controle.retourMenu(RepasActivity.this);
             }
         }) ;
     }
@@ -75,9 +77,9 @@ public class RepasActivity extends AppCompatActivity {
     private void cmdValider_clic() {
         findViewById(R.id.cmdRepasValider).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                Serializer.serialize(Global.filename, Global.listFraisMois, RepasActivity.this) ;
+                controle.enregistrerLocal(RepasActivity.this);
                 Toast.makeText(RepasActivity.this, "Repas enregistrés", Toast.LENGTH_SHORT).show() ;
-                Global.retourMenu(RepasActivity.this);
+                controle.retourMenu(RepasActivity.this);
             }
         }) ;
     }
@@ -88,7 +90,7 @@ public class RepasActivity extends AppCompatActivity {
         findViewById(R.id.cmdRepasPlus).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 qte+=1 ;
-                Global.enregNewQte(((EditText) findViewById(R.id.txtRepas)), annee, mois, qte, "repas");
+                controle.enregNewQte(((EditText) findViewById(R.id.txtRepas)), annee, mois, qte, "repas");
             }
         }) ;
     }
@@ -99,7 +101,7 @@ public class RepasActivity extends AppCompatActivity {
         findViewById(R.id.cmdRepasMoins).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 qte = Math.max(0, qte-1) ; // suppression de 1 si possible
-                Global.enregNewQte(((EditText) findViewById(R.id.txtRepas)), annee, mois, qte, "repas");
+                controle.enregNewQte(((EditText) findViewById(R.id.txtRepas)), annee, mois, qte, "repas");
             }
         }) ;
     }
@@ -128,8 +130,8 @@ public class RepasActivity extends AppCompatActivity {
         // récupération de la qte correspondant au mois actuel
         qte = 0 ;
         int key = annee*100+mois ;
-        if (Global.listFraisMois.containsKey(key)) {
-            qte = Global.listFraisMois.get(key).getRepas() ;
+        if (controle.getListFraisMois().containsKey(key)) {
+            qte = controle.getListFraisMois().get(key).getRepas() ;
         }
         ((EditText)findViewById(R.id.txtRepas)).setText(String.valueOf(qte)) ;
     }

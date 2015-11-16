@@ -1,8 +1,10 @@
 package fr.hugya.gsbandroid.controleur;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Hashtable;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
@@ -13,31 +15,49 @@ import android.widget.EditText;
 
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.modele.FraisMois;
+import fr.hugya.gsbandroid.modele.Serializer;
 import fr.hugya.gsbandroid.vue.MainActivity;
 
 /**
- * Classe abstraite contenant diverses fonctions utilitaires
+ * Classe controleur contenant diverses fonctions utilitaires
  * @author Hugo Stéphan
  */
-public abstract class Global {
-    // PROPRIETEES :
+public class Controleur implements Serializable {
+	public Hashtable<Integer, FraisMois> getListFraisMois() {
+		return listFraisMois;
+	}
+
+	// PROPRIETEES :
     // -------------
 	// tableau d'informations mémorisées
-	public static Hashtable<Integer, FraisMois> listFraisMois = new Hashtable<>() ;
+	private Hashtable<Integer, FraisMois> listFraisMois = new Hashtable<>() ;
 	// fichier contenant les informations sérialisées
-	public static final String filename = "savev1-1.fic" ;
+	private final String filename = "savev1-1.fic" ;
 
+	public Controleur (Context context) {
+		listFraisMois = (Hashtable<Integer, FraisMois>) Serializer.deSerialize(filename, context) ;
+		// si rien n'a été récupéré, il faut créer la liste
+		if (listFraisMois==null) {
+			listFraisMois = new Hashtable<>();
+		}
+	}
+	public void enregistrerLocal (Context context) {
+		// Enregistrement de l'état des frais
+		Serializer.serialize(filename, listFraisMois, context) ;
+	}
 	/**
 	 * Fonction qui permet de retourner au menu appelée dans toutes les sous activity)
 	 */
-	public static void retourMenu (AppCompatActivity a) {
+	public void retourMenu (AppCompatActivity a) {
 		Intent monIntent = new Intent(a, MainActivity.class) ;
+		monIntent.putExtra("ctrl", this) ;
 		a.startActivity(monIntent) ;
+		a.finish() ;
 	}
     /**
      * Enregistrement dans la zone de texte et dans la liste de la nouvelle qte, à la date choisie
      */
-    public static void enregNewQte(EditText txtRepas, int annee, int mois, int qte, String typeFrais) {
+    public void enregNewQte(EditText txtRepas, int annee, int mois, int qte, String typeFrais) {
         // enregistrement dans la zone de texte
         txtRepas.setText(String.valueOf(qte)) ;
         // enregistrement dans la liste
@@ -65,7 +85,7 @@ public abstract class Global {
 	/**
 	 * Modification de l'affichage de la date (juste le mois et l'année, sans le jour)
 	 */
-	public static void changeAfficheDate(DatePicker datePicker) {
+	public void changeAfficheDate(DatePicker datePicker) {
 		//try {
 				DatePicker dp_mes = datePicker;
 
