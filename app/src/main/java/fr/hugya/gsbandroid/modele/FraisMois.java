@@ -3,14 +3,13 @@ package fr.hugya.gsbandroid.modele;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import fr.hugya.gsbandroid.modele.FraisHf;
-
 /**
  * Classe métier contenant les informations des frais d'un mois
- *
+ * @author Hugo Stéphan, Suriya Sammandamourthy
  */
 public class FraisMois implements Serializable {
-
+	// PROPRIETES :
+	// -------------
 	private Integer mois ; // mois concerné
 	private Integer annee ; // année concernée
 	private Integer etape ; // nombre d'étapes du mois
@@ -18,7 +17,61 @@ public class FraisMois implements Serializable {
 	private Integer nuitee ; // nombre de nuitées du mois
 	private Integer repas ; // nombre de repas du mois
 	private ArrayList<FraisHf> lesFraisHf ; // liste des frais hors forfait du mois
-	
+
+
+	// ACCESSEURS :
+	// ------------
+	/**
+	 * Suppression d'un frais hors forfait
+	 * @param index
+	 */
+	public void supprFraisHf(Integer index) {
+		lesFraisHf.remove(index) ;
+	}
+	public Integer getMois() {
+		return mois;
+	}
+	public void setMois(Integer mois) {
+		this.mois = mois;
+	}
+	public Integer getAnnee() {
+		return annee;
+	}
+	public void setAnnee(Integer annee) {
+		this.annee = annee;
+	}
+	public Integer getEtape() {
+		return etape;
+	}
+	public void setEtape(Integer etape) {
+		this.etape = etape;
+	}
+	public Integer getKm() {
+		return km;
+	}
+	public void setKm(Integer km) {
+		this.km = km;
+	}
+	public Integer getNuitee() {
+		return nuitee;
+	}
+	public void setNuitee(Integer nuitee) {
+		this.nuitee = nuitee;
+	}
+	public Integer getRepas() {
+		return repas;
+	}
+	public void setRepas(Integer repas) {
+		this.repas = repas;
+	}
+	public ArrayList<FraisHf> getLesFraisHf() {
+		return lesFraisHf ;
+	}
+	public void setLesFraisHf(ArrayList<FraisHf> l) { lesFraisHf = l ;}
+
+
+	// CONSTRUCTEURS :
+	// --------------
 	public FraisMois(Integer annee, Integer mois) {
 		this.annee = annee ;
 		this.mois = mois ;
@@ -29,6 +82,9 @@ public class FraisMois implements Serializable {
 		lesFraisHf = new ArrayList<>() ;
 	}
 
+
+	// FONCTIONS OUTILS/AUTRES :
+	// -------------------------
 	/**
 	 * Ajout d'un frais hors forfait
 	 * @param montant
@@ -37,67 +93,4 @@ public class FraisMois implements Serializable {
 	public void addFraisHf(Integer montant, String motif, Integer jour) {
 		lesFraisHf.add(new FraisHf(montant, motif, jour)) ;
 	}
-	
-	/**
-	 * Suppression d'un frais hors forfait
-	 * @param index
-	 */
-	public void supprFraisHf(Integer index) {
-		lesFraisHf.remove(index) ;
-	}
-	
-	public Integer getMois() {
-		return mois;
-	}
-
-	public void setMois(Integer mois) {
-		this.mois = mois;
-	}
-
-	public Integer getAnnee() {
-		return annee;
-	}
-
-	public void setAnnee(Integer annee) {
-		this.annee = annee;
-	}
-
-	public Integer getEtape() {
-		return etape;
-	}
-
-	public void setEtape(Integer etape) {
-		this.etape = etape;
-	}
-
-	public Integer getKm() {
-		return km;
-	}
-
-	public void setKm(Integer km) {
-		this.km = km;
-	}
-
-	public Integer getNuitee() {
-		return nuitee;
-	}
-
-	public void setNuitee(Integer nuitee) {
-		this.nuitee = nuitee;
-	}
-
-	public Integer getRepas() {
-		return repas;
-	}
-
-	public void setRepas(Integer repas) {
-		this.repas = repas;
-	}	
-	
-	public ArrayList<FraisHf> getLesFraisHf() {
-		return lesFraisHf ;
-	}
-
-	public void setLesFraisHf(ArrayList<FraisHf> l) { lesFraisHf = l ;} ;
-	
 }

@@ -1,30 +1,23 @@
-package fr.hugya.gsbandroid.modele;
+package fr.hugya.gsbandroid.outils;
 
-import java.io.BufferedWriter;
-import java.io.File;
+import android.content.Context;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.StreamCorruptedException;
-
-import android.content.Context;
-import android.os.Environment;
-import android.util.Log;
 
 /**
  * Classe qui permet de sérialiser et désérialiser des objets
  * @author Emds
- *
  */
 public abstract class Serializer {
-
 	/**
 	 * Sérialisation d'un objet
-	// * @param namefile
+	 * @param filename
 	 * @param object
 	 */
 	public static void serialize(String filename, Object object, Context context) {
@@ -45,7 +38,6 @@ public abstract class Serializer {
 			e.printStackTrace();
 		}
 	}
-	
 	/**
 	 * Désérialisation d'un objet
 	 * @param filename
@@ -66,10 +58,7 @@ public abstract class Serializer {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			} catch (StreamCorruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -79,5 +68,4 @@ public abstract class Serializer {
 		}
 		return null ;		
 	}
-	
 }

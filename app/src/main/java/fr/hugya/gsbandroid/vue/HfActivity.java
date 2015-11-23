@@ -16,10 +16,14 @@ import fr.hugya.gsbandroid.R;
 
 /**
  * Classe gérant l'activité la saisie de frais hors forfaits
- * @author Hugo Stéphan
+ * @author Hugo Stéphan, Suriya Sammandamourthy
  */
 public class HfActivity extends AppCompatActivity {
+	// PROPRIETES :
+	// -------------
     private Controleur controle ;
+
+
     // FONCTIONS REDEFINIES :
     // ----------------------
     /**

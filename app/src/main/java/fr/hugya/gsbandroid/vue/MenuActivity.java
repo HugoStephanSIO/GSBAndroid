@@ -1,31 +1,25 @@
 package fr.hugya.gsbandroid.vue;
 
-import java.util.Hashtable;
-
-//import org.apache.http.client.ClientProtocolException;
-//import org.apache.http.client.HttpClient;
-//import org.apache.http.client.methods.HttpPost;
-//import org.apache.http.impl.client.DefaultHttpClient;
-//import org.json.JSONObject;
-
-import android.os.Bundle;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 
-import fr.hugya.gsbandroid.modele.FraisMois;
-import fr.hugya.gsbandroid.controleur.Controleur;
 import fr.hugya.gsbandroid.R;
-import fr.hugya.gsbandroid.modele.Serializer;
+import fr.hugya.gsbandroid.controleur.Controleur;
 
 /**
  * Class qui gère l'activité principale c'est à dire le menu
- * @author Hugo Stéphan
+ * @author Hugo Stéphan, Suriya Sammandamourthy
  */
-public class MainActivity extends AppCompatActivity {
-    Controleur controle ;
+public class MenuActivity extends AppCompatActivity {
+    // PROPRIETES :
+    // ------------
+    private Controleur controle ;
+
+
     // FONCTIONS REDEFINIES :
     // ----------------------
     /**
@@ -35,18 +29,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        // récupération des informations sérialisées
+        setContentView(R.layout.activity_menu);
         Intent monIntent = getIntent () ;
-        if (monIntent.getSerializableExtra("ctrl")!= null)
-        {
-            controle = (Controleur)monIntent.getSerializableExtra("ctrl") ;
-        }
-        else
-        {
-            controle = new Controleur(MainActivity.this);
-        }
-        // chargement des fonctions événementielles
+        controle = (Controleur)monIntent.getSerializableExtra("ctrl") ;
+        controle.recupererLocal(MenuActivity.this);
+        // Chargement des fonctions événementielles
         cmdMenu_clic(((Button)findViewById(R.id.cmdKm)), KmActivity.class) ;
         cmdMenu_clic(((Button)findViewById(R.id.cmdHf)), HfActivity.class) ;
         cmdMenu_clic(((Button)findViewById(R.id.cmdHfRecap)), HfRecapActivity.class) ;
@@ -71,9 +58,10 @@ public class MainActivity extends AppCompatActivity {
     private void cmdMenu_clic(Button button, final Class classe) {
     	button.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                // ouvre l'activité
-                Intent intent = new Intent(MainActivity.this, classe);
+                // Transmission du controleur à l'activité secondaire
+                Intent intent = new Intent(MenuActivity.this, classe);
                 intent.putExtra("ctrl", controle) ;
+                // Ouverture de l'activité
                 startActivity(intent);
                 finish() ;
             }
@@ -85,25 +73,8 @@ public class MainActivity extends AppCompatActivity {
     private void cmdTransfert_clic() {
     	findViewById(R.id.cmdTransfert).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                // envoi les informations sérialisées vers le serveur
-                // ---------------------------
-                // /!\ A FAIRE /!\
-                // ---------------------------
+                controle.syncUp(MenuActivity.this);
             }
         }) ;
     }
-
-
-    // FONCTIONS OUTILS/AUTRES :
-    // -------------------------
-    /**
-     * Récupére la sérialisation si elle existe
-     *//*
-    private void recupSerialize() {
-        Global.listFraisMois = (Hashtable<Integer, FraisMois>) Serializer.deSerialize(Global.filename, MainActivity.this) ;
-        // si rien n'a été récupéré, il faut créer la liste
-        if (Global.listFraisMois==null) {
-            Global.listFraisMois = new Hashtable<>() ;
-        }
-    }*/
 }

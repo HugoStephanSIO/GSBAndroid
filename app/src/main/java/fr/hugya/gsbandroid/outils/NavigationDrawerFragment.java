@@ -1,4 +1,4 @@
-package fr.hugya.gsbandroid.vue;
+package fr.hugya.gsbandroid.outils;
 
 import android.support.v7.app.AppCompatActivity;
 import android.app.Activity;

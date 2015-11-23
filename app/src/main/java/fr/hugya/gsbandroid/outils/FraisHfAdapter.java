@@ -1,4 +1,4 @@
-package fr.hugya.gsbandroid.modele;
+package fr.hugya.gsbandroid.outils;
 
 import java.util.ArrayList;
 
@@ -12,20 +12,31 @@ import android.widget.BaseAdapter;
 
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.controleur.Controleur;
+import fr.hugya.gsbandroid.modele.FraisHf;
 
 /**
  * Adapter pour la liste des frais hors forfait d'un mois donné
- * @author Hugo Stéphan
+ * @author Hugo Stéphan, Suriya Sammandamourthy
  */
 public class FraisHfAdapter extends BaseAdapter {
-    // PROPRIETEES :
+    // PROPRIETES :
     // -------------
 	ArrayList<FraisHf> lesFrais ; // liste des frais du mois
 	LayoutInflater inflater ;
 	Integer key ;  // annee et mois (clé dans la liste)
 	Context context ; // contexte pour gérer la sérialisation
 	Controleur controle ;
-	
+	// Sous classe contenant la structure d'une ligne de la liste
+	private class ViewHolder {
+		TextView txtListJour ;
+		TextView txtListMontant ;
+		TextView txtListMotif ;
+		ImageView imgSuppr ;
+	}
+
+
+	// CONSTRUCTEURS :
+	// --------------
 	/**
 	 * Constructeur de l'adapter pour valoriser les propriétés
 	 * @param context
@@ -39,41 +50,31 @@ public class FraisHfAdapter extends BaseAdapter {
 		this.context = context ;
 		this.controle = ctrl ;
 	}
-	
+
+
+	// FONCTIONS REDEFINIES :
+	// ----------------------
 	/**
-	 * retourne le nombre d'éléments de la listview
+	 * Retourne le nombre d'éléments de la listview
 	 */
 	@Override
 	public int getCount() {
 		return lesFrais.size() ;
 	}
-
 	/**
-	 * retourne l'item de la listview à un index précis
+	 * Retourne l'item de la listview à un index précis
 	 */
 	@Override
 	public Object getItem(int index) {
 		return lesFrais.get(index) ;
 	}
-
 	/**
-	 * retourne l'index de l'élément actuel
+	 * Retourne l'index de l'élément actuel
 	 */
 	@Override
 	public long getItemId(int index) {
 		return index;
 	}
-
-	/**
-	 * structure contenant les éléments d'une ligne
-	 */
-	private class ViewHolder {
-		TextView txtListJour ;
-		TextView txtListMontant ;
-		TextView txtListMotif ;
-        ImageView imgSuppr ;
-	}
-	
 	/**
 	 * Affichage dans la liste
 	 */

@@ -1,7 +1,7 @@
 package fr.hugya.gsbandroid.vue;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -10,17 +10,16 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import fr.hugya.gsbandroid.controleur.Controleur;
 import fr.hugya.gsbandroid.R;
-import fr.hugya.gsbandroid.modele.Serializer;
+import fr.hugya.gsbandroid.controleur.Controleur;
 
 /**
  * Classe gérant l'activité concernant la saisie des frais de repas
- * @author Hugo Stéphan
+ * @author Hugo Stéphan, Suriya Sammandamourthy
  */
 public class RepasActivity extends AppCompatActivity {
-    // PROPRIETEES :
-    // -------------
+    // PROPRIETES :
+    // ------------
     // informations affichées dans l'activity
     private int annee ;
     private int mois ;
@@ -38,11 +37,12 @@ public class RepasActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_repas);
-        // modification de l'affichage du DatePicker
-        controle = (Controleur)getIntent().getSerializableExtra("ctrl") ;
+        // Modification de l'affichage du DatePicker
+        controle = (Controleur)(getIntent().getSerializableExtra("ctrl")) ;
         controle.changeAfficheDate((DatePicker) findViewById(R.id.datRepas)) ;
-        // valorisation du champ d'entrée de texte et impossibilité de l'éditer directement
-        valoriseProprietes();
+        // Valorisation du champ d'entrée de texte
+        valoriserProprietes() ;
+        // On empêche l'utilisateur de modifier le champ de texte sans passé par les boutons +/-
         ((EditText)findViewById(R.id.txtRepas)).setKeyListener(null);
         // Lancement des fonctions événementielles
         imgReturn_clic() ;
@@ -113,26 +113,20 @@ public class RepasActivity extends AppCompatActivity {
         uneDate.init(uneDate.getYear(), uneDate.getMonth(), uneDate.getDayOfMonth(), new DatePicker.OnDateChangedListener() {
             @Override
             public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                valoriseProprietes();
+                valoriserProprietes();
             }
         });
     }
 
 
-    // FONCTIONS OUTILS/AUTRES :
-    // -------------------------
+    // FONCTIONS OUTLS/AUTRES :
+    // ------------------------
     /**
-     * Valorisation des propriétés avec les informations affichées
+     * Fonction utilisée pour récupérer les informations
      */
-    private void valoriseProprietes() {
+    private void valoriserProprietes () {
         annee = ((DatePicker)findViewById(R.id.datRepas)).getYear() ;
-        mois = ((DatePicker)findViewById(R.id.datRepas)).getMonth() + 1 ;
-        // récupération de la qte correspondant au mois actuel
-        qte = 0 ;
-        int key = annee*100+mois ;
-        if (controle.getListFraisMois().containsKey(key)) {
-            qte = controle.getListFraisMois().get(key).getRepas() ;
-        }
-        ((EditText)findViewById(R.id.txtRepas)).setText(String.valueOf(qte)) ;
+        mois = ((DatePicker)findViewById(R.id.datRepas)).getMonth() + 1;
+        qte = controle.valoriseProprietes(((DatePicker) findViewById(R.id.datRepas)), ((EditText) findViewById(R.id.txtRepas)),"repas");
     }
 }
