@@ -56,24 +56,34 @@ public class HfActivity extends AppCompatActivity {
      */
     private void imgReturn_clic() {
     	findViewById(R.id.imgHfReturn).setOnClickListener(new ImageView.OnClickListener() {
-            public void onClick(View v) {
-				Toast.makeText(HfActivity.this, "Frais hors forfait enregistré", Toast.LENGTH_SHORT).show() ;
-                controle.retourMenu(HfActivity.this);
-            }
-        }) ;
+			public void onClick(View v) {
+				Toast.makeText(HfActivity.this, "Frais hors forfait enregistré", Toast.LENGTH_SHORT).show();
+				controle.retourMenu(HfActivity.this);
+			}
+		}) ;
     }
     /**
      * Fonction événementelle appelée en cas de clic sur le bouton ajouter : enregistrement dans la liste et sérialisation
      */
     private void cmdAjouter_clic() {
     	findViewById(R.id.cmdHfAjouter).setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                enregListe();
-				Toast.makeText(HfActivity.this, "Frais hors forfait enregistré", Toast.LENGTH_SHORT).show() ;
-                controle.enregistrerLocal(HfActivity.this);
-                controle.retourMenu(HfActivity.this);
-            }
-        }) ;
+			public void onClick(View v) {
+				if (Integer.parseInt(((EditText) findViewById(R.id.txtHf)).getText().toString()) == 0) {
+					controle.setApp(HfActivity.this);
+					controle.message("Veuillez saisir un montant !");
+					return ;
+				}
+				if (((EditText) findViewById(R.id.txtHfMotif)).getText().toString() == "") {
+					controle.setApp(HfActivity.this);
+					controle.message("Veuillez saisir un motif !") ;
+					return ;
+				}
+				enregListe();
+				Toast.makeText(HfActivity.this, "Frais hors forfait enregistré", Toast.LENGTH_SHORT).show();
+				controle.enregistrerLocal(HfActivity.this);
+				controle.retourMenu(HfActivity.this);
+			}
+		}) ;
     }
 
 

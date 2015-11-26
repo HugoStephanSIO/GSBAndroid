@@ -2,6 +2,7 @@ package fr.hugya.gsbandroid.modele;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Classe métier contenant les informations des frais d'un mois
@@ -64,10 +65,10 @@ public class FraisMois implements Serializable {
 	public void setRepas(Integer repas) {
 		this.repas = repas;
 	}
-	public ArrayList<FraisHf> getLesFraisHf() {
+	public ArrayList<FraisHf> getLesFraisHF() {
 		return lesFraisHf ;
 	}
-	public void setLesFraisHf(ArrayList<FraisHf> l) { lesFraisHf = l ;}
+	public void setLesFraisHF(ArrayList<FraisHf> l) { lesFraisHf = l ;}
 
 
 	// CONSTRUCTEURS :
@@ -92,5 +93,19 @@ public class FraisMois implements Serializable {
 	 */
 	public void addFraisHf(Integer montant, String motif, Integer jour) {
 		lesFraisHf.add(new FraisHf(montant, motif, jour)) ;
+	}
+    /**
+     * Conversion en list<String> pour l'enregistrement distant
+     * @return List<string> version list compatible JSONArray des frais du mois
+     */
+	public List<String> convertirFraisList () {
+		List list = new ArrayList <String> () ;
+        Integer key = this.annee*100+this.mois ;
+		list.add(key.toString());
+		list.add(this.km.toString());
+		list.add(this.etape.toString());
+		list.add(this.nuitee.toString());
+        list.add(this.repas.toString());
+		return list ;
 	}
 }

@@ -93,7 +93,7 @@ public class HfRecapActivity extends AppCompatActivity {
 		Integer key = annee*100 + mois ;
 		ArrayList<FraisHf> liste ;
 		if (controle.getListFraisMois().containsKey(key)) {
-			liste = controle.getListFraisMois().get(key).getLesFraisHf() ;
+			liste = controle.getListFraisMois().get(key).getLesFraisHF() ;
 		}else{
 			liste = new ArrayList<>() ;
 			// insertion dans la listview

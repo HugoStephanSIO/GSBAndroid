@@ -1,6 +1,7 @@
 package fr.hugya.gsbandroid.outils;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -14,78 +15,67 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 
 /**
- * Classe utilitaire de type thread pour simplifier l'accès aux pages PHP et donc à la BDD distante
- * @author Hugo Stéphan, Suriya Sammandamourthy
+ * Classe utilitaire, de type thread qui s'éxécute en parallèle (AsyncThread) de façon à ne pas interrompre le processus principal,
+ * pour simplifier l'accès aux pages PHP et donc à la BDD distante
+ * @author Hugo Stéphan, Suriya Sammandamourthy, Emds
  */
 public class AccesHTTP extends AsyncTask<String, Integer, Long> {
 	// PROPRIETES :
-	// -------------
-	public String ret=""; // Enregistre le retour du serveur
-	private ArrayList<NameValuePair> parametres; // Paramétres éventuels à envoyer
+	// ------------
+	public String ret="";
+	private ArrayList<NameValuePair> parametres;
+	public AsyncResponse delegate=null;
 
 
-    // CONSTRUCTEURS :
-    // --------------
+	// CONSTRUCTEURS :
+	// ---------------
 	public AccesHTTP(){
-		parametres = new ArrayList<NameValuePair>();
+		parametres = new ArrayList<>();
 	}
 
 
-    // FONCTIONS REDEFINIES :
-    // ----------------------
-    /**
-     * Fonction qui gère la connexion au serveur à proprement parler en arrière plan
-     * @param urls
-     * @return
-     */
+	// FONCTIONS OUTILS/AUTRES :
+	// -------------------------
+	/**
+	 * Ajout d'un paramètre à l'envoi HTTP sous la forme d'un couple clef(nom)/valeur, récupérable sur le serveur, en PHP :
+	 * $_REQUEST[nom] = valeur
+	 * @param nom
+	 * @param valeur
+	 */
+	public void addParam(String nom, String valeur){
+		parametres.add(new BasicNameValuePair(nom,valeur));
+	}
+	/**
+	 * Fonction de connexion au serveur en tache de fond
+	 * @param urls
+	 * @return
+	 */
 	@Override
 	protected Long doInBackground(String... urls) {
-		// TODO Auto-generated method stub
-		
 		HttpClient cnxHttp = new DefaultHttpClient();
 		HttpPost paramCnx = new HttpPost(urls[0]);
-		
+		// Tentative de connexion
 		try {
-		    paramCnx.setEntity(new UrlEncodedFormEntity(parametres));
-		    HttpResponse reponse = cnxHttp.execute(paramCnx);
-		    ret = EntityUtils.toString(reponse.getEntity());
-		
+			paramCnx.setEntity(new UrlEncodedFormEntity(parametres));
+			HttpResponse reponse = cnxHttp.execute(paramCnx);
+			ret = EntityUtils.toString(reponse.getEntity());
+
 		} catch (ClientProtocolException e) {
-		    // TODO Auto-generated catch block
+			Log.d("Erreur ClientProtocol", e.toString()) ;
 		} catch (IOException e) {
-		    // TODO Auto-generated catch block
+			Log.d("Erreur IOException", e.toString()) ;
 		}
 		return null;
 	}
 	/**
-	 * Fonction à redéfinir dans la classe qui l'appelle pour définir le code qui s'éxécute au moment de la transmission au serveur
+	 * Au moment du retour du serveur, on termine le processus asynchrone qui gère la connexion au serveur
 	 * @param result
 	 */
 	@Override
 	protected void onPostExecute(Long result) {
-
-    }
-
-
-    // FONCTIONS OUTILS/AUTRES :
-    // -------------------------
-    /**
-     * Ajoute un paramètre à transmettre à la page PHP serveur
-     * @param nom
-     * @param valeur
-     */
-    public void addParam(String nom, String valeur){
-        parametres.add(new BasicNameValuePair(nom,valeur));
-    }
-	/**
-	 * Surcharge
-	 * @param id
-	 */
-	public void addParam(Hashtable<String,String> id) {
-		addParam("login", id.get("login"));
-		addParam("password", id.get("password"));
+		// ret contient l'information récupérée
+		delegate.processFinish(this.ret.toString());
 	}
 }

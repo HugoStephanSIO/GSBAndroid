@@ -1,6 +1,7 @@
 package fr.hugya.gsbandroid.modele;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.Serializable;
 import java.util.Hashtable;
@@ -17,8 +18,8 @@ public class AccesLocal implements Serializable {
     // PROPRIETES :
     // ------------
     // Fichier contenant les informations sérialisées
-    private final String bddLocalFilename = "data.gsb" ;
-    private final String authenticationFilename = "ide.gsb" ;
+    private final String bddLocalFilename = "lesFrais.gsb" ;
+    private final String authenticationFilename = "Utilisateur.gsb" ;
     private Hashtable<String,String> id ;
     public Hashtable<String,String> getId () { return id ; }
     private boolean estCo ;
@@ -74,9 +75,7 @@ public class AccesLocal implements Serializable {
      * @param profil identifiants de l'utilisateur à enregistrer localement
      */
     public void enregistrerUtilisateurLocal(Context context, Hashtable<String,String> profil) {
-        if (profil.size()!=2) {
-            return ;
-        }
+        Log.d("id = ", profil.get("id")) ;
         Serializer.serialize(authenticationFilename,profil, context);
     }
 }

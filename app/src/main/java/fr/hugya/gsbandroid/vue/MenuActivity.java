@@ -6,6 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
+import java.io.Serializable;
 
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.controleur.Controleur;
@@ -14,7 +17,7 @@ import fr.hugya.gsbandroid.controleur.Controleur;
  * Class qui gère l'activité principale c'est à dire le menu
  * @author Hugo Stéphan, Suriya Sammandamourthy
  */
-public class MenuActivity extends AppCompatActivity {
+public class MenuActivity extends AppCompatActivity implements Serializable {
     // PROPRIETES :
     // ------------
     private Controleur controle ;
@@ -74,6 +77,7 @@ public class MenuActivity extends AppCompatActivity {
     	findViewById(R.id.cmdTransfert).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 controle.syncUp(MenuActivity.this);
+                Toast.makeText(MenuActivity.this,"Synchronisation effectuée",Toast.LENGTH_SHORT);
             }
         }) ;
     }

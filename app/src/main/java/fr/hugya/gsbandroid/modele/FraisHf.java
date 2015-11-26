@@ -1,6 +1,8 @@
 package fr.hugya.gsbandroid.modele;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Classe métier contenant la description d'un frais hors forfait
@@ -33,5 +35,13 @@ public class FraisHf  implements Serializable {
 		this.montant = montant ;
 		this.motif = motif ;
 		this.jour = jour ;
+	}
+
+	public List<String> convertirFraisHFList () {
+		List <String> list = new ArrayList<String>() ;
+		list.add(montant.toString()) ;
+		list.add(motif) ;
+		list.add(jour.toString()) ;
+		return list ;
 	}
 }

@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.Serializable;
 import java.util.Hashtable;
 
 import fr.hugya.gsbandroid.R;
@@ -18,7 +19,7 @@ import fr.hugya.gsbandroid.controleur.Controleur;
  * Classe gérant l'activité concernant l'identification de l'utilisateur
  * @author Hugo Stéphan, Suriya Sammandamourthy
  */
-public class ConnexionActivity extends AppCompatActivity {
+public class ConnexionActivity extends AppCompatActivity implements Serializable {
     // PROPRIETES :
     // ------------
     private Controleur controle ;
@@ -67,18 +68,7 @@ public class ConnexionActivity extends AppCompatActivity {
                 tab.put("login", login);
                 tab.put("password", password);
                 // Tentative d'identification
-                controle.identifierUtilisateurDistant(tab);
-                if (controle.estCo()) { // Si l'identification a réussie
-                    // Enregistrement de l'utilisateur en local
-                    controle.enregistrerUtilisateurLocal (ConnexionActivity.this, tab) ;
-                    // Récupération des infos de la base distante
-                    controle.syncDown(ConnexionActivity.this);
-                    // Ouverture du menu
-                    controle.retourMenu(ConnexionActivity.this);
-                }
-                else {
-                    Toast.makeText(ConnexionActivity.this,"Identifiant incorrects",Toast.LENGTH_SHORT).show () ;
-                }
+                controle.identifierUtilisateurDistant(tab, ConnexionActivity.this);
                 return ;
             }
         });

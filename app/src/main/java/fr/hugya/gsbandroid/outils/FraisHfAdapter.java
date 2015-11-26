@@ -1,14 +1,18 @@
 package fr.hugya.gsbandroid.outils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.BaseAdapter;
+import android.widget.Toast;
 
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.controleur.Controleur;
@@ -16,16 +20,17 @@ import fr.hugya.gsbandroid.modele.FraisHf;
 
 /**
  * Adapter pour la liste des frais hors forfait d'un mois donné
- * @author Hugo Stéphan, Suriya Sammandamourthy
+ * @author Hugo Stéphan, Suriya Sammandamourthy, Emds
  */
-public class FraisHfAdapter extends BaseAdapter {
+public class FraisHfAdapter extends BaseAdapter implements Serializable{
     // PROPRIETES :
     // -------------
-	ArrayList<FraisHf> lesFrais ; // liste des frais du mois
-	LayoutInflater inflater ;
-	Integer key ;  // annee et mois (clé dans la liste)
-	Context context ; // contexte pour gérer la sérialisation
-	Controleur controle ;
+	private ArrayList<FraisHf> lesFrais ; // liste des frais du mois
+    private LayoutInflater inflater ;
+    private Integer key ;  // annee et mois (clé dans la liste)
+    private Context context ; // contexte pour gérer la sérialisation
+    private Controleur controle ;
+    private View vv ;
 	// Sous classe contenant la structure d'une ligne de la liste
 	private class ViewHolder {
 		TextView txtListJour ;
@@ -102,9 +107,42 @@ public class FraisHfAdapter extends BaseAdapter {
         // Fonction événementielle appelée en cas de clic sur le bouton supprimer
         holder.imgSuppr.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                int index = (Integer)v.getTag() ;
-                lesFrais.remove(index) ;
-                controle.getListFraisMois().get(key).setLesFraisHf(lesFrais) ;
+                // Récupération de la vue de la ligne de la liste concernée
+                vv = v ;
+                // Création d'une boite de dialogue de confirmation de la suppression
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            // Confirmation de suppression
+                            case DialogInterface.BUTTON_POSITIVE:
+                                // Récupération du numéro du frais hors forfait
+                                int index = (Integer) vv.getTag();
+                                // Suppression de la ligne du frais hors forfait dans la BDD Distante
+                                controle.supprFraisHFDistant(key.toString(), lesFrais.get(index).getMotif(),
+                                                                            lesFrais.get(index).getJour().toString(),
+                                                                            lesFrais.get(index).getMontant().toString());
+                                // Suppression de la ligne du frais hors forfait dans la liste affichée
+                                lesFrais.remove(index);
+                                // Suppression de la ligne du frais hors forfait dans la liste des frais du mois du controleur
+                                controle.getListFraisMois().get(key).setLesFraisHF(lesFrais);
+                                // Enregistrement de l'état de la liste des frais
+                                controle.enregistrerLocal(context);
+                                // Mise à jour de l'affichage
+                                notifyDataSetChanged();
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                break;
+                        }
+                    }
+                };
+                // Affichage de la boite de dialogue
+                AlertDialog.Builder ab = new AlertDialog.Builder(context);
+                ab.setMessage("Voulez vous vraiment supprimer ce frais hors forfait ?")
+                                                        .setPositiveButton("Oui", dialogClickListener)
+                                                        .setNegativeButton("Non", dialogClickListener)
+                                                        .show();
                 notifyDataSetChanged();
             }
         });

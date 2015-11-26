@@ -9,13 +9,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import org.json.JSONArray;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import fr.hugya.gsbandroid.modele.AccesDistant;
 import fr.hugya.gsbandroid.modele.AccesLocal;
+import fr.hugya.gsbandroid.modele.FraisHf;
 import fr.hugya.gsbandroid.modele.FraisMois;
 import fr.hugya.gsbandroid.vue.MenuActivity;
 
@@ -26,28 +32,42 @@ import fr.hugya.gsbandroid.vue.MenuActivity;
 public class Controleur implements Serializable { // Serializable pour pouvoir être transmis entre les activitées
 	// PROPRIETES :
     // ------------
+    // Compteur de threads de connexion actifs
+    public static Integer nbReqEnCours = 0 ;
 	// Objet d'accès local
 	private AccesLocal accesLocal ;
 	// Objet d'accès distant
 	private AccesDistant accesDistant ;
     // Logs de l'utilisateur
     private Hashtable<String,String> id ;
-    public Hashtable<String,String> getId () {return id ;}
+    public Hashtable<String,String> getId () {
+        return id ;
+    }
+    public void setId(Hashtable<String,String> tab) {
+        this.id = tab ;
+    }
     // Statut de la connexion
     private boolean estCo = false ;
+    private boolean coStatusChanged = false ;
     public boolean estCo () { return estCo ; }
     // Tableau d'informations mémorisées en local
     private Hashtable<Integer, FraisMois> listFraisMois = new Hashtable<>() ;
     public Hashtable<Integer, FraisMois> getListFraisMois() {
         return listFraisMois;
     }
+    // Contexte éventuel
+    private AppCompatActivity app ;
+    public AppCompatActivity getApp () {
+        return app ;
+    }
+    public void setApp (AppCompatActivity a) { this.app = a ;}
 
 
     // CONSTRUCTEURS :
     // --------------
     public Controleur (Context context) {
         // Initialisation des objets du modéle
-		accesDistant = new AccesDistant() ;
+		accesDistant = new AccesDistant(id,this) ;
 		accesLocal = new AccesLocal () ;
         // Si un profil est enregistré en local
         if(accesLocal.recupererProfilLocal(context)) {
@@ -94,8 +114,8 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
 		Intent monIntent = new Intent(a, MenuActivity.class) ;
 		monIntent.putExtra("ctrl", this) ;
 		// Ouverture de la nouvelle activité, fermeture de la précédente
-		a.startActivity(monIntent) ;
-		a.finish() ;
+		a.startActivity(monIntent);
+        a.finish() ;
 	}
 	/**
 	 * Enregistrement dans la zone de texte et dans la liste de la nouvelle qte, à la date choisie
@@ -178,11 +198,11 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
 				int month   = dp_mes.getMonth();
 				int day     = dp_mes.getDayOfMonth();
 
-				dp_mes.init(year, month, day, new DatePicker.OnDateChangedListener() {
-                    @Override
-                    public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                    }
-                });
+        dp_mes.init(year, month, day, new DatePicker.OnDateChangedListener() {
+            @Override
+            public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            }
+        });
 
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
 					int daySpinnerId = Resources.getSystem().getIdentifier("day", "id", "android");
@@ -275,26 +295,15 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
      * Fonction qui tente d'identifier l'utilisateur à partir des logs transmis en arguments
      * @param logs "login"/login "password/password
      */
-    public void identifierUtilisateurDistant (Hashtable<String,String> logs) {
-        // Tentative de connexion de l'utilisateur
-        accesDistant.identifierUtilisateur(logs);
-        // Mise à jour éventuelle des infos interne au controleur
-        estCo = accesDistant.estCo() ;
-        if (estCo){ // Si la connexion a réussie
-            id = logs ;
-        }
-    }
-    /**
-     * Surcharge
-     * @param login
-     * @param password
-     */
-    public void identifierUtilisateurDistant (String login, String password) {
-        Hashtable<String,String> logs = new Hashtable<String,String>();
-        logs.put("login", login);
-        logs.put("password", password);
-        // Tentative de connexion de l'utilisateur
-        this.identifierUtilisateurDistant(logs);
+    public void identifierUtilisateurDistant (Hashtable<String,String> logs, AppCompatActivity app) {
+		id = logs ;
+        List list = new ArrayList<>() ;
+		list.add(logs.get("login")) ;
+		list.add(logs.get("password")) ;
+        this.app = app ;
+        accesDistant.setId(id) ;
+		// Tentative de connexion de l'utilisateur
+        accesDistant.envoiDistant("checkLogs", new JSONArray(list));
     }
     /**
      * Fonction qui récupére les données de frais de l'utilisateur
@@ -302,28 +311,67 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
      * @param context
      */
     public void syncDown (Context context) {
-        // On ne peut faire une synchronisation descendante qu'en étant correctement loggé
-        if (id == null || id.size()!=2) {
-            return ;
-        }
-		if (!estCo) {
-			return ;
-		}
-        listFraisMois = accesDistant.recupererDistant (id) ;
-        enregistrerLocal(context);
     }
     /**
      * Fonction qui envoie les données enregistrées localement à la base distante
      * @param context
      */
     public void syncUp (Context context) {
-        // On ne peut faire une synchronisation montante qu'en étant correctement loggé
-        if (id == null || id.size()!=2) {
+        // Récupération de ce qui est enregistré en local ??? NECESSAIRE ???
+        recupererLocal(context);
+        // Enregistrement du contexte
+        this.app = (AppCompatActivity)context ;
+        // Transfert d'id dans la classe thread async
+        accesDistant.setId(id) ;
+        // La synchronisation montante implique d'être identifié en utilisateur distant et donc d'avoir récupérer l'id distant
+        if (id.size()!=3) {
+            Log.d("Erreur Controleur", "id.size() != 3 while must be") ;
             return ;
         }
-        if (!estCo) {
-            return ;
+        // Déclaration des deux listes qui seront remplies plusieurs fois dans la double boucle
+        List<String> listFrais ;
+        List<String> listFraisHF;
+        // Parcours tous les FraisMois du tableau
+        for(FraisMois fm : listFraisMois.values()) {
+            // Récupération des frais du mois en forme de liste ce mois
+            listFrais = fm.convertirFraisList() ;
+            // Récupération de la clef
+            Integer key = fm.getAnnee() * 100 + fm.getMois() ;
+            // Envoi d'une requête de création d'une fichefrais
+			List donneesFicheFrais = new ArrayList () ;
+            donneesFicheFrais.add(id.get("id")) ;
+            donneesFicheFrais.add(key) ;
+            donneesFicheFrais.add("CR") ;
+            accesDistant.envoiDistant("newFicheFrais", new JSONArray(donneesFicheFrais));
+            // Ajout de l'id de l'utilisateur en première position de la liste de ce mois
+            listFrais.add(0, id.get("id")) ;
+            // Envoi de la liste au serveur pour enrgistrement des frais forfait de ce mois
+            accesDistant.envoiDistant("addLesLignesFrais", new JSONArray(listFrais));
+            // Parcours de tous les frais hors forfaits
+            for (FraisHf fhf : fm.getLesFraisHF()) {
+                // Récupération des frais hors forfait du mois en cours
+                listFraisHF = fhf.convertirFraisHFList() ;
+                // Ajout de l'id utilisateur en première position de la liste et de la clef en deuxième
+                listFraisHF.add(0, id.get("id")) ;
+                listFraisHF.add(1, key.toString ()) ;
+                // Envoi de la liste au serveur pour enregistrement des frais hors forfait de ce mois
+                accesDistant.envoiDistant("addUneLigneFraisHF", new JSONArray(listFraisHF)) ;
+            }
         }
-        accesDistant.enregistrerDistant (listFraisMois) ;
+    }
+    /**
+     * Affiche un message Toast
+     */
+	public void message (String message) {
+        Toast.makeText(app, message, Toast.LENGTH_SHORT).show() ;
+    }
+	public void supprFraisHFDistant (String key, String motif, String jour, String montant) {
+        List list = new ArrayList<>() ;
+        list.add(id.get("id")) ;
+        list.add(key) ;
+        list.add(motif) ;
+        list.add(jour) ;
+        list.add(montant) ;
+        accesDistant.envoiDistant("supprFraisHF", new JSONArray(list)); ;
     }
 }
