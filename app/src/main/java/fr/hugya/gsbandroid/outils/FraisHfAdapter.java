@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.controleur.Controleur;
 import fr.hugya.gsbandroid.modele.FraisHf;
+import fr.hugya.gsbandroid.vue.HfRecapActivity;
 
 /**
  * Adapter pour la liste des frais hors forfait d'un mois donné
@@ -120,18 +122,20 @@ public class FraisHfAdapter extends BaseAdapter implements Serializable{
                                 int index = (Integer) vv.getTag();
                                 // Suppression de la ligne du frais hors forfait dans la BDD Distante
                                 controle.supprFraisHFDistant(key.toString(), lesFrais.get(index).getMotif(),
-                                                                            lesFrais.get(index).getJour().toString(),
-                                                                            lesFrais.get(index).getMontant().toString());
+                                        lesFrais.get(index).getJour().toString(),
+                                        lesFrais.get(index).getMontant().toString());
                                 // Suppression de la ligne du frais hors forfait dans la liste affichée
                                 lesFrais.remove(index);
                                 // Suppression de la ligne du frais hors forfait dans la liste des frais du mois du controleur
                                 controle.getListFraisMois().get(key).setLesFraisHF(lesFrais);
                                 // Enregistrement de l'état de la liste des frais
                                 controle.enregistrerLocal(context);
+                                controle.setApp((AppCompatActivity)context) ;
+                                controle.message ("Frais hors forfait supprimé") ;
                                 // Mise à jour de l'affichage
                                 notifyDataSetChanged();
                                 break;
-
+                            // Annulation : on ne fait rien
                             case DialogInterface.BUTTON_NEGATIVE:
                                 break;
                         }
@@ -143,6 +147,7 @@ public class FraisHfAdapter extends BaseAdapter implements Serializable{
                                                         .setPositiveButton("Oui", dialogClickListener)
                                                         .setNegativeButton("Non", dialogClickListener)
                                                         .show();
+                // Mise à jour de l'affichage, jamais atteint/inutile ?
                 notifyDataSetChanged();
             }
         });

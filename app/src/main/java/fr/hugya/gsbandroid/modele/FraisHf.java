@@ -37,6 +37,13 @@ public class FraisHf  implements Serializable {
 		this.jour = jour ;
 	}
 
+
+	// FONCTION OUTILS/AUTRES :
+	// ------------------------
+	/**
+	 * Retourne une version List<String> compatible JSON du frais hors forfait
+	 * @return la liste compatible JSON
+	 */
 	public List<String> convertirFraisHFList () {
 		List <String> list = new ArrayList<String>() ;
 		list.add(montant.toString()) ;

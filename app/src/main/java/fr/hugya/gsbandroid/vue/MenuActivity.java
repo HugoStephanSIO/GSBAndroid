@@ -31,11 +31,12 @@ public class MenuActivity extends AppCompatActivity implements Serializable {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_menu);
+        super.onCreate(savedInstanceState) ;
+        setContentView(R.layout.activity_menu) ;
         Intent monIntent = getIntent () ;
         controle = (Controleur)monIntent.getSerializableExtra("ctrl") ;
-        controle.recupererLocal(MenuActivity.this);
+        controle.recupererLocal(MenuActivity.this) ;
+
         // Chargement des fonctions événementielles
         cmdMenu_clic(((Button)findViewById(R.id.cmdKm)), KmActivity.class) ;
         cmdMenu_clic(((Button)findViewById(R.id.cmdHf)), HfActivity.class) ;
@@ -44,12 +45,20 @@ public class MenuActivity extends AppCompatActivity implements Serializable {
         cmdMenu_clic(((Button)findViewById(R.id.cmdNuitee)), NuitActivity.class) ;
         cmdMenu_clic(((Button)findViewById(R.id.cmdEtape)), EtapeActivity.class) ;
         cmdTransfert_clic() ;
+
+        // Si des modifs ont été faites en locales et nécessitent une syncUp, on affiche un message
+        if (controle.getModif()) {
+            (findViewById(R.id.lblModif)).setVisibility(View.VISIBLE) ;
+        }
+        else {
+            (findViewById(R.id.lblModif)).setVisibility(View.GONE) ;
+        }
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        getMenuInflater().inflate(R.menu.main, menu) ;
+        return true ;
     }
 
 
@@ -62,10 +71,10 @@ public class MenuActivity extends AppCompatActivity implements Serializable {
     	button.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 // Transmission du controleur à l'activité secondaire
-                Intent intent = new Intent(MenuActivity.this, classe);
+                Intent intent = new Intent(MenuActivity.this, classe) ;
                 intent.putExtra("ctrl", controle) ;
                 // Ouverture de l'activité
-                startActivity(intent);
+                startActivity(intent) ;
                 finish() ;
             }
         }) ;
@@ -76,8 +85,9 @@ public class MenuActivity extends AppCompatActivity implements Serializable {
     private void cmdTransfert_clic() {
     	findViewById(R.id.cmdTransfert).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                controle.syncUp(MenuActivity.this);
-                Toast.makeText(MenuActivity.this,"Synchronisation effectuée",Toast.LENGTH_SHORT);
+                controle.setApp(MenuActivity.this) ;
+                controle.syncUp(MenuActivity.this) ;
+                Toast.makeText(MenuActivity.this,"Synchronisation effectuée",Toast.LENGTH_SHORT) ;
             }
         }) ;
     }

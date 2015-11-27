@@ -33,7 +33,7 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
 	// PROPRIETES :
     // ------------
     // Compteur de threads de connexion actifs
-    public static Integer nbReqEnCours = 0 ;
+    public static Integer nbReqEnCours = 0 ; // PAS PROPRE ?
 	// Objet d'accès local
 	private AccesLocal accesLocal ;
 	// Objet d'accès distant
@@ -48,7 +48,6 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
     }
     // Statut de la connexion
     private boolean estCo = false ;
-    private boolean coStatusChanged = false ;
     public boolean estCo () { return estCo ; }
     // Tableau d'informations mémorisées en local
     private Hashtable<Integer, FraisMois> listFraisMois = new Hashtable<>() ;
@@ -61,6 +60,10 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
         return app ;
     }
     public void setApp (AppCompatActivity a) { this.app = a ;}
+    // Indicateur de modifications faites en locales pour signaler la nécéssité d'une syncUp
+    private boolean modif = false ;
+    public void setModif (boolean b) { this.modif = b ;}
+    public boolean getModif () { return this.modif ; }
 
 
     // CONSTRUCTEURS :
@@ -80,8 +83,8 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
 	}
 
 
-	// FONCTIONS OUTILS/AUTRES :
-	// -------------------------
+	// FONCTIONS ACCES DONNEES LOCALES :
+	// ---------------------------------
 	/**
 	 * Fonctions visant à récupérer les informations enregistrées localement (deSerialization)
 	 * @param context
@@ -96,6 +99,7 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
 	public void enregistrerLocal (Context context) {
 		// Enregistrement de l'état des frais
 		accesLocal.enregistrerLocal(context, listFraisMois);
+        modif = true ;
 	}
     /**
      * Encapsulation de la procédure accesLocal.enregistrerUtilisateurLocal
@@ -105,197 +109,16 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
     public void enregistrerUtilisateurLocal (Context context, Hashtable<String,String> tab) {
         accesLocal.enregistrerUtilisateurLocal(context, tab);
     }
-	/**
-	 * Fonction qui permet de retourner au menu, appelée dans toutes les sous activitées)
-	 * @param a activité appelante
-	 */
-	public void retourMenu (AppCompatActivity a) {
-		// Transmission du controleur en argument
-		Intent monIntent = new Intent(a, MenuActivity.class) ;
-		monIntent.putExtra("ctrl", this) ;
-		// Ouverture de la nouvelle activité, fermeture de la précédente
-		a.startActivity(monIntent);
-        a.finish() ;
-	}
-	/**
-	 * Enregistrement dans la zone de texte et dans la liste de la nouvelle qte, à la date choisie
-	 * @param txtView afficheur textuel où afficher les informations
-	 * @param annee
-	 * @param mois
-	 * @param qte quantité à enregistrer
-	 * @param typeFrais type de frais à enregistrer repas/nuit/km/etape
-	 */
-    public void enregNewQte(EditText txtView, int annee, int mois, int qte, String typeFrais) {
-        // Enregistrement dans la zone de texte
-        txtView.setText(String.valueOf(qte)) ;
-        // Enregistrement dans la liste
-        int key = annee*100+mois ;
-        if (!listFraisMois.containsKey(key)) {
-            // Creation du mois et de l'annee s'ils n'existent pas déjà
-            listFraisMois.put(key, new FraisMois(annee, mois)) ;
-        }
-        // Switch selon le type de frais à enregistrer
-        switch (typeFrais) {
-            case "repas" :
-                listFraisMois.get(key).setRepas(qte);
-                break ;
-            case "nuit" :
-                listFraisMois.get(key).setNuitee(qte);
-                break ;
-            case "km" :
-                listFraisMois.get(key).setKm(qte);
-                break ;
-            case "etape" :
-                listFraisMois.get(key).setEtape(qte);
-                break ;
-        }
-    }
-	/**
-	 * Affichage des informations du jour séléctionné si elles existent
-	 * @param datView datePicker où récupérer la date
-	 * @param txtView afficheur où afficher les infos récup.
-	 * @param typeFrais type de frais à récupérer
-	 */
-	public int valoriseProprietes(DatePicker datView, EditText txtView, String typeFrais) {
-		// Récupération de l'année et du mois
-		int annee = datView.getYear() ;
-		int mois = datView.getMonth() + 1 ;
-		// Récupération de la qte correspondant au mois actuel
-		int qte = 0 ;
-		int key = annee*100+mois ;
-		if (listFraisMois.containsKey(key)) {
-			switch(typeFrais) {
-				case "km":
-					qte = listFraisMois.get(key).getKm();
-					break ;
-				case "repas":
-					qte = listFraisMois.get(key).getRepas();
-					break;
-				case "nuit":
-					qte = listFraisMois.get(key).getNuitee();
-					break;
-				case "etape":
-					qte = listFraisMois.get(key).getEtape();
-					break;
-				default :
-					Log.d("ERREUR", "Type de frais non reconnu") ;
-					qte = -1 ;
-					break ;
-			}
-		}
-		txtView.setText(String.valueOf(qte)) ;
-		return qte ;
-	}
-	/**
-	 * Modification de l'affichage de la date (juste le mois et l'année, sans le jour)
-	 * @param datePicker datePicker a modifié
-	 */
-	public void changeAfficheDate(DatePicker datePicker) {
-		//try {
-				DatePicker dp_mes = datePicker;
 
-				int year    = dp_mes.getYear();
-				int month   = dp_mes.getMonth();
-				int day     = dp_mes.getDayOfMonth();
 
-        dp_mes.init(year, month, day, new DatePicker.OnDateChangedListener() {
-            @Override
-            public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-            }
-        });
-
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-					int daySpinnerId = Resources.getSystem().getIdentifier("day", "id", "android");
-					if (daySpinnerId != 0)
-					{
-						View daySpinner = dp_mes.findViewById(daySpinnerId);
-						if (daySpinner != null)
-						{
-							daySpinner.setVisibility(View.GONE);
-						}
-					}
-
-					int monthSpinnerId = Resources.getSystem().getIdentifier("month", "id", "android");
-					if (monthSpinnerId != 0)
-					{
-						View monthSpinner = dp_mes.findViewById(monthSpinnerId);
-						if (monthSpinner != null)
-						{
-							monthSpinner.setVisibility(View.VISIBLE);
-						}
-					}
-
-					int yearSpinnerId = Resources.getSystem().getIdentifier("year", "id", "android");
-					if (yearSpinnerId != 0)
-					{
-						View yearSpinner = dp_mes.findViewById(yearSpinnerId);
-						if (yearSpinner != null)
-						{
-							yearSpinner.setVisibility(View.VISIBLE);
-						}
-					}
-				} else {
-					Field f[] = dp_mes.getClass().getDeclaredFields();
-					for (Field field : f)
-					{
-						if(field.getName().equals("mDayPicker") || field.getName().equals("mDaySpinner"))
-						{
-							field.setAccessible(true);
-							Object dayPicker = null;
-							try {
-								dayPicker = field.get(dp_mes);
-							} catch (IllegalAccessException e) {
-								e.printStackTrace();
-							}
-							try {
-                                assert ((View) dayPicker) != null;
-                                ((View) dayPicker).setVisibility(View.GONE);
-                            } catch (NullPointerException e) {
-                                e.printStackTrace();
-                            }
-						}
-
-						if(field.getName().equals("mMonthPicker") || field.getName().equals("mMonthSpinner"))
-						{
-							field.setAccessible(true);
-							Object monthPicker = null;
-							try {
-								monthPicker = field.get(dp_mes);
-							} catch (IllegalAccessException e) {
-								e.printStackTrace();
-							}
-		                    try {
-                                assert ((View) monthPicker) != null;
-                                ((View) monthPicker).setVisibility(View.VISIBLE);
-                            } catch (NullPointerException e) {
-                                e.printStackTrace();
-                            }
-						}
-
-						if(field.getName().equals("mYearPicker") || field.getName().equals("mYearSpinner"))
-						{
-							field.setAccessible(true);
-							Object yearPicker = null;
-							try {
-								yearPicker = field.get(dp_mes);
-							} catch (IllegalAccessException e) {
-								e.printStackTrace();
-							}
-                            try {
-                                assert ((View) yearPicker) != null;
-                                ((View) yearPicker).setVisibility(View.VISIBLE);
-                            } catch (NullPointerException e) {
-                                e.printStackTrace();
-                            }
-						}
-					}
-				}
-	}
+    // FONCTIONS ACCES DONNEES DISTANTES :
+    // -----------------------------------
     /**
      * Fonction qui tente d'identifier l'utilisateur à partir des logs transmis en arguments
      * @param logs "login"/login "password/password
      */
     public void identifierUtilisateurDistant (Hashtable<String,String> logs, AppCompatActivity app) {
+        // Création de la list JSON compatible avec les ids
 		id = logs ;
         List list = new ArrayList<>() ;
 		list.add(logs.get("login")) ;
@@ -317,6 +140,10 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
      * @param context
      */
     public void syncUp (Context context) {
+        // Remise à false de l'indicateur de modif locales à enregistrer en distant
+        this.modif = false ;
+        app.finish() ;
+        app.startActivity(app.getIntent()) ;
         // Récupération de ce qui est enregistré en local ??? NECESSAIRE ???
         recupererLocal(context);
         // Enregistrement du contexte
@@ -360,18 +187,218 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
         }
     }
     /**
-     * Affiche un message Toast
+     * Supprime un frais hors forfait de la BDD distante, s'il existe
+     * @param key "AAAAMM"
+     * @param motif
+     * @param jour
+     * @param montant
      */
-	public void message (String message) {
-        Toast.makeText(app, message, Toast.LENGTH_SHORT).show() ;
-    }
 	public void supprFraisHFDistant (String key, String motif, String jour, String montant) {
+        // Création de la list compatible JSON avec les infos du frais hors forfait à supprimer
         List list = new ArrayList<>() ;
         list.add(id.get("id")) ;
         list.add(key) ;
         list.add(motif) ;
         list.add(jour) ;
         list.add(montant) ;
+        // Envoie de la requête de suppression
         accesDistant.envoiDistant("supprFraisHF", new JSONArray(list)); ;
+    }
+
+
+    // FONCTIONS OUTILS/AUTRES :
+    // -------------------------
+    /**
+     * Enregistrement dans la zone de texte et dans la liste de la nouvelle qte, à la date choisie
+     * @param txtView afficheur textuel où afficher les informations
+     * @param annee
+     * @param mois
+     * @param qte quantité à enregistrer
+     * @param typeFrais type de frais à enregistrer repas/nuit/km/etape
+     */
+    public void enregNewQte(EditText txtView, int annee, int mois, int qte, String typeFrais) {
+        // Enregistrement dans la zone de texte
+        txtView.setText(String.valueOf(qte)) ;
+        // Enregistrement dans la liste
+        int key = annee*100+mois ;
+        if (!listFraisMois.containsKey(key)) {
+            // Creation du mois et de l'annee s'ils n'existent pas déjà
+            listFraisMois.put(key, new FraisMois(annee, mois)) ;
+        }
+        // Switch selon le type de frais à enregistrer
+        switch (typeFrais) {
+            case "repas" :
+                listFraisMois.get(key).setRepas(qte);
+                break ;
+            case "nuit" :
+                listFraisMois.get(key).setNuitee(qte);
+                break ;
+            case "km" :
+                listFraisMois.get(key).setKm(qte);
+                break ;
+            case "etape" :
+                listFraisMois.get(key).setEtape(qte);
+                break ;
+        }
+    }
+    /**
+     * Affichage des informations du jour séléctionné si elles existent
+     * @param datView datePicker où récupérer la date
+     * @param txtView afficheur où afficher les infos récup.
+     * @param typeFrais type de frais à récupérer
+     */
+    public int valoriseProprietes(DatePicker datView, EditText txtView, String typeFrais) {
+        // Récupération de l'année et du mois
+        int annee = datView.getYear() ;
+        int mois = datView.getMonth() + 1 ;
+        // Récupération de la qte correspondant au mois actuel
+        int qte = 0 ;
+        int key = annee*100+mois ;
+        // Switch selon le type de frais à récupérer
+        if (listFraisMois.containsKey(key)) {
+            switch(typeFrais) {
+                case "km":
+                    qte = listFraisMois.get(key).getKm();
+                    break ;
+                case "repas":
+                    qte = listFraisMois.get(key).getRepas();
+                    break;
+                case "nuit":
+                    qte = listFraisMois.get(key).getNuitee();
+                    break;
+                case "etape":
+                    qte = listFraisMois.get(key).getEtape();
+                    break;
+                default :
+                    Log.d("ERREUR", "Type de frais non reconnu") ;
+                    qte = -1 ;
+                    break ;
+            }
+        }
+        txtView.setText(String.valueOf(qte)) ;
+        return qte ;
+    }
+    /**
+     * Modification de l'affichage de la date (juste le mois et l'année, sans le jour)
+     * @param datePicker datePicker a modifié
+     */
+    public void changeAfficheDate(DatePicker datePicker) {
+        //try {
+        DatePicker dp_mes = datePicker;
+
+        int year    = dp_mes.getYear();
+        int month   = dp_mes.getMonth();
+        int day     = dp_mes.getDayOfMonth();
+
+        dp_mes.init(year, month, day, new DatePicker.OnDateChangedListener() {
+            @Override
+            public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            }
+        });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            int daySpinnerId = Resources.getSystem().getIdentifier("day", "id", "android");
+            if (daySpinnerId != 0)
+            {
+                View daySpinner = dp_mes.findViewById(daySpinnerId);
+                if (daySpinner != null)
+                {
+                    daySpinner.setVisibility(View.GONE);
+                }
+            }
+
+            int monthSpinnerId = Resources.getSystem().getIdentifier("month", "id", "android");
+            if (monthSpinnerId != 0)
+            {
+                View monthSpinner = dp_mes.findViewById(monthSpinnerId);
+                if (monthSpinner != null)
+                {
+                    monthSpinner.setVisibility(View.VISIBLE);
+                }
+            }
+
+            int yearSpinnerId = Resources.getSystem().getIdentifier("year", "id", "android");
+            if (yearSpinnerId != 0)
+            {
+                View yearSpinner = dp_mes.findViewById(yearSpinnerId);
+                if (yearSpinner != null)
+                {
+                    yearSpinner.setVisibility(View.VISIBLE);
+                }
+            }
+        } else {
+            Field f[] = dp_mes.getClass().getDeclaredFields();
+            for (Field field : f)
+            {
+                if(field.getName().equals("mDayPicker") || field.getName().equals("mDaySpinner"))
+                {
+                    field.setAccessible(true);
+                    Object dayPicker = null;
+                    try {
+                        dayPicker = field.get(dp_mes);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        assert ((View) dayPicker) != null;
+                        ((View) dayPicker).setVisibility(View.GONE);
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if(field.getName().equals("mMonthPicker") || field.getName().equals("mMonthSpinner"))
+                {
+                    field.setAccessible(true);
+                    Object monthPicker = null;
+                    try {
+                        monthPicker = field.get(dp_mes);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        assert ((View) monthPicker) != null;
+                        ((View) monthPicker).setVisibility(View.VISIBLE);
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if(field.getName().equals("mYearPicker") || field.getName().equals("mYearSpinner"))
+                {
+                    field.setAccessible(true);
+                    Object yearPicker = null;
+                    try {
+                        yearPicker = field.get(dp_mes);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        assert ((View) yearPicker) != null;
+                        ((View) yearPicker).setVisibility(View.VISIBLE);
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * Affiche un message Toast
+     */
+    public void message (String message) {
+        Toast.makeText(app, message, Toast.LENGTH_SHORT).show() ;
+    }
+    /**
+     * Fonction qui permet de retourner au menu, appelée dans toutes les sous activitées)
+     * @param a activité appelante
+     */
+    public void retourMenu (AppCompatActivity a) {
+        // Transmission du controleur en argument
+        Intent monIntent = new Intent(a, MenuActivity.class) ;
+        monIntent.putExtra("ctrl", this) ;
+        // Ouverture de la nouvelle activité, fermeture de la précédente
+        a.startActivity(monIntent);
+        a.finish() ;
     }
 }

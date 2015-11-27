@@ -10,6 +10,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.Serializable;
+
 import fr.hugya.gsbandroid.modele.FraisMois;
 import fr.hugya.gsbandroid.controleur.Controleur;
 import fr.hugya.gsbandroid.R;
@@ -18,7 +20,7 @@ import fr.hugya.gsbandroid.R;
  * Classe gérant l'activité la saisie de frais hors forfaits
  * @author Hugo Stéphan, Suriya Sammandamourthy
  */
-public class HfActivity extends AppCompatActivity {
+public class HfActivity extends AppCompatActivity implements Serializable {
 	// PROPRIETES :
 	// -------------
     private Controleur controle ;
@@ -57,7 +59,6 @@ public class HfActivity extends AppCompatActivity {
     private void imgReturn_clic() {
     	findViewById(R.id.imgHfReturn).setOnClickListener(new ImageView.OnClickListener() {
 			public void onClick(View v) {
-				Toast.makeText(HfActivity.this, "Frais hors forfait enregistré", Toast.LENGTH_SHORT).show();
 				controle.retourMenu(HfActivity.this);
 			}
 		}) ;
@@ -73,7 +74,7 @@ public class HfActivity extends AppCompatActivity {
 					controle.message("Veuillez saisir un montant !");
 					return ;
 				}
-				if (((EditText) findViewById(R.id.txtHfMotif)).getText().toString() == "") {
+				if (((EditText)findViewById(R.id.txtHfMotif)).getText().toString().equals("")) {
 					controle.setApp(HfActivity.this);
 					controle.message("Veuillez saisir un motif !") ;
 					return ;

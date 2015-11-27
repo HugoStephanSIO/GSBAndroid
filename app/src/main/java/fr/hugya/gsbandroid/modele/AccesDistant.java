@@ -26,10 +26,6 @@ import fr.hugya.gsbandroid.outils.AsyncResponse;
 public class AccesDistant implements Serializable, AsyncResponse {
     // PROPRIETES :
     // ------------
-    private boolean estCo = false ;
-    public boolean estCo () {
-        return estCo ;
-    }
     private Hashtable<String,String> id ;
     public void setId(Hashtable<String,String> logs) { this.id = logs ; }
     public Hashtable<String,String> getId () { return id ; }
@@ -101,7 +97,6 @@ public class AccesDistant implements Serializable, AsyncResponse {
         }
         else if (message[0].equals("identificationOk")) {
             // Si c'est un retour d'identification positif, mise à jour des données, enregistrement de l'id distant
-            estCo = true ;
             id.put("id", message[1]) ;
             controle.setId(id) ;
             controle.retourMenu(controle.getApp()) ;

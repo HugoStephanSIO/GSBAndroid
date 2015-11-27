@@ -10,6 +10,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.Serializable;
+
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.controleur.Controleur;
 
@@ -17,7 +19,7 @@ import fr.hugya.gsbandroid.controleur.Controleur;
  * Classe gérant l'activité concernant la saisie des frais d'étapes
  * @author Hugo Stéphan, Suriya Sammandamourthy
  */
-public class EtapeActivity extends AppCompatActivity {
+public class EtapeActivity extends AppCompatActivity implements Serializable {
     // PROPRIETES :
     // -------------
     // Informations affichées dans l'activity

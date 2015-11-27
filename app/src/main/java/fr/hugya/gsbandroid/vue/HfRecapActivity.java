@@ -9,6 +9,7 @@ import android.widget.DatePicker.OnDateChangedListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import fr.hugya.gsbandroid.R;
@@ -20,10 +21,11 @@ import fr.hugya.gsbandroid.outils.FraisHfAdapter;
  * Classe gérant l'activité concernant l'affichage et la suppresion des frais hors forfaits
  * @author Hugo Stéphan, Suriya Sammandamourthy
  */
-public class HfRecapActivity extends AppCompatActivity {
+public class HfRecapActivity extends AppCompatActivity implements Serializable {
 	// PROPRIETES :
 	// -------------
 	private Controleur controle ;
+    private boolean modif = false ;
 
 
 	// FONCTIONS REDEFINIES :
@@ -43,6 +45,7 @@ public class HfRecapActivity extends AppCompatActivity {
 		// Valorisation des propriétés
 		afficheListe() ;
         // Chargement des méthodes événementielles
+        modif = controle.getModif() ;
 		imgReturn_clic() ;
 		dat_clic() ;
 	}
@@ -62,7 +65,13 @@ public class HfRecapActivity extends AppCompatActivity {
     private void imgReturn_clic() {
     	findViewById(R.id.imgHfRecapReturn).setOnClickListener(new ImageView.OnClickListener() {
     		public void onClick(View v) {
+                // Mise à jour de l'enregistrement local
                 controle.enregistrerLocal(HfRecapActivity.this) ;
+                // On remet l'indicateur de modif à l'état auquel il était au moment de l'arrivée dans l'activité,
+                // la suppression distante étant directement prise en charge dans la fct événementielle clique sur le bouton
+                // supprimer, l'activité ne doit pas modifier l'indicateur, or il est mis à true par défaut dans la fct
+                // controle.enregistrerLocal
+                controle.setModif (modif) ;
     			controle.retourMenu(HfRecapActivity.this);
     		}
     	}) ;
@@ -89,14 +98,14 @@ public class HfRecapActivity extends AppCompatActivity {
 	private void afficheListe() {
 		Integer annee = ((DatePicker)findViewById(R.id.datHfRecap)).getYear() ;
 		Integer mois = ((DatePicker)findViewById(R.id.datHfRecap)).getMonth() + 1 ;
-		// récupération des frais HF pour cette date
+		// Récupération des frais HF pour cette date
 		Integer key = annee*100 + mois ;
 		ArrayList<FraisHf> liste ;
 		if (controle.getListFraisMois().containsKey(key)) {
 			liste = controle.getListFraisMois().get(key).getLesFraisHF() ;
-		}else{
+		} else {
 			liste = new ArrayList<>() ;
-			// insertion dans la listview
+			// Insertion dans la listview
 		}
 		ListView listView = (ListView)findViewById(R.id.lstHfRecap) ;
 		FraisHfAdapter adapter = new FraisHfAdapter(HfRecapActivity.this, liste, key, controle) ;

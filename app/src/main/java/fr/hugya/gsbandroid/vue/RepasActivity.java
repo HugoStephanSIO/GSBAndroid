@@ -10,6 +10,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.Serializable;
+
 import fr.hugya.gsbandroid.R;
 import fr.hugya.gsbandroid.controleur.Controleur;
 
@@ -17,7 +19,7 @@ import fr.hugya.gsbandroid.controleur.Controleur;
  * Classe gérant l'activité concernant la saisie des frais de repas
  * @author Hugo Stéphan, Suriya Sammandamourthy
  */
-public class RepasActivity extends AppCompatActivity {
+public class RepasActivity extends AppCompatActivity implements Serializable {
     // PROPRIETES :
     // ------------
     // informations affichées dans l'activity
