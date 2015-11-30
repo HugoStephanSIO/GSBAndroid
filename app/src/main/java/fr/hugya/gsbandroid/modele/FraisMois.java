@@ -108,4 +108,12 @@ public class FraisMois implements Serializable {
         list.add(this.repas.toString());
 		return list ;
 	}
+	/**
+	 * Retourne une version chaîne de caractère du frais du mois
+	 * TAG_DEBUG
+	 * @return
+	 */
+	public String toString () {
+		return "FraisMois du "+annee.toString()+mois.toString()+"-- ETP:"+etape+" / "+"KM:"+km+" / "+"NUI:"+nuitee+" / "+"REP:"+repas ;
+	}
 }

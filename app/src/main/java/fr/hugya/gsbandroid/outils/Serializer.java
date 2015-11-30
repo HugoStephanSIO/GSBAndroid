@@ -1,6 +1,7 @@
 package fr.hugya.gsbandroid.outils;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -55,12 +56,12 @@ public abstract class Serializer {
 					ois.close() ;
 					return object ;
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Log.d("Erreur deSerialize", e.getMessage()) ;
+					return null ;
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.d("Erreur deSerialize", e.getMessage()) ;
+				return null ;
 			}
 		} catch (FileNotFoundException e) {
 			// fichier non trouvé

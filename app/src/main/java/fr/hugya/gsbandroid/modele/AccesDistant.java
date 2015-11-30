@@ -1,17 +1,12 @@
 package fr.hugya.gsbandroid.modele;
 
-import android.os.Handler;
-import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 
 import fr.hugya.gsbandroid.controleur.Controleur;
 import fr.hugya.gsbandroid.outils.AccesHTTP;
@@ -29,7 +24,7 @@ public class AccesDistant implements Serializable, AsyncResponse {
     private Hashtable<String,String> id ;
     public void setId(Hashtable<String,String> logs) { this.id = logs ; }
     public Hashtable<String,String> getId () { return id ; }
-    private final String adresseIP = "192.168.1.46";
+    private final String adresseIP = "172.20.2.255";
     private final String adresseServeur = "http://" + adresseIP + "/gsbandroid/gsb.android.php" ;
     private Controleur controle ;
 
@@ -41,7 +36,7 @@ public class AccesDistant implements Serializable, AsyncResponse {
         this.controle = controle ;
     }
     public AccesDistant(Hashtable<String,String> logs, Controleur controle) {
-        this.controle = controle ;
+        this(controle) ;
         id = logs ;
     }
 
@@ -64,10 +59,10 @@ public class AccesDistant implements Serializable, AsyncResponse {
         accesDonnees.addParam("op", operation);
         accesDonnees.addParam("lesDonnees", lesDonneesJSON.toString());
         // Envoi
-        Log.d("ENVOI", "DISTANT !!!");
+        Log.d("ENVOI", "DISTANT !!!"); // TAG_DEBUG
         accesDonnees.execute(adresseServeur);
         Controleur.nbReqEnCours++ ;
-        Log.d("nbReq =", Controleur.nbReqEnCours.toString()) ; // DEBUG
+        Log.d("nbReq =", Controleur.nbReqEnCours.toString()) ; // TAG_DEBUG
     }
     /**
      * Retour du serveur : méthode événementielle qui s'éxécute au moment où le processus se termine donc :
@@ -86,32 +81,58 @@ public class AccesDistant implements Serializable, AsyncResponse {
 
         // Mise à jour du compteur de requête au serveur
         Controleur.nbReqEnCours-- ;
-        Log.d("MESSAGE =", output) ; // DEBUG
-        String[] message = output.split("%");
-        Log.d("nbReq =", Controleur.nbReqEnCours.toString()) ; // DEBUG
+        Log.d("MESSAGE =", output) ; // TAG_DEBUG
+        String[] message = output.split("%") ;
+        Log.d("nbReq =", Controleur.nbReqEnCours.toString()) ; // TAG_DEBUG
+        // Echec de la connexion
         if (message[0].equals("echec")) {
             controle.message("Identifiant ou mot de passe incorrects") ;
         }
+        // Erreur accés BDD
         else if (message[0].equals("erreur")) {
-            controle.message(message[1]) ;
+            controle.message(message[1]);
         }
         else if (message[0].equals("identificationOk")) {
             // Si c'est un retour d'identification positif, mise à jour des données, enregistrement de l'id distant
             id.put("id", message[1]) ;
             controle.setId(id) ;
-            controle.retourMenu(controle.getApp()) ;
-            controle.enregistrerUtilisateurLocal(controle.getApp(),id);
+            controle.syncDown(controle.getApp());
+            controle.enregistrerUtilisateurLocal(controle.getApp(),id) ;
         }
-        else if (message[0].equals("InsertionFMOk")) {
+        else if (message[0].equals("insertionFMOk")) {
             // Si c'était la dernière requête en cours, c'est que la synchronisation est terminée
             if (Controleur.nbReqEnCours == 0) {
-                controle.message("Synchronisation terminée !");
+                //controle.endChargement();
+                controle.message("Synchronisation terminée !") ;
             }
         }
         else if (message[0].equals("insertionFHFOk")) {
             // Si c'était la dernière requête en cours, c'est que la synchronisation est terminée
             if (Controleur.nbReqEnCours == 0) {
-                controle.message("Synchronisation terminée !");
+                //controle.endChargement();
+                controle.message("Synchronisation terminée !") ;
+            }
+        }
+        else if (message[0].equals("recupFraisOK")) {
+            // Retour d'une demande de syncDown
+            try {
+                // Récupération des données JSON à traiter dans le retour serveur et appel de la méthode de traitement
+                JSONArray jsonTab = new JSONArray(message[1]);
+                controle.recupererFraisDistant(jsonTab) ;
+            } catch (JSONException e) {
+                Log.d ("Erreur JSON", e.getMessage()) ;
+                controle.message("Erreur lors de la récupération des frais distants") ;
+            }
+        }
+        else if (message[0].equals("recupFraisHFOK")) {
+            // Retour d'une demande de syncDown
+            try {
+                // Récupération des données JSON à traiter dans le retour serveur et appel de la méthode de traitement
+                JSONArray jsonTab = new JSONArray(message[1]) ;
+                controle.recupererFraisHFDistant(jsonTab) ;
+            } catch (JSONException e) {
+                Log.d ("Erreur JSON", e.getMessage()) ;
+                controle.message("Erreur lors de la récupération des frais distants") ;
             }
         }
     }

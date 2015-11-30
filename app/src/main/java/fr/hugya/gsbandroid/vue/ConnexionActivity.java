@@ -1,5 +1,6 @@
 package fr.hugya.gsbandroid.vue;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -23,6 +24,7 @@ public class ConnexionActivity extends AppCompatActivity implements Serializable
     // PROPRIETES :
     // ------------
     private Controleur controle ;
+    private ProgressDialog pd;
 
 
     // FONCTIONS REDEFINIES :
@@ -39,8 +41,7 @@ public class ConnexionActivity extends AppCompatActivity implements Serializable
         // Création du controleur qui vérifie si un profil a été enregistré en local
         controle = new Controleur (ConnexionActivity.this) ;
         if (controle.estCo()) { // Si oui on ouvre directement le menu
-            controle.syncDown(ConnexionActivity.this) ;
-            controle.retourMenu (ConnexionActivity.this) ;
+            controle.syncDown (ConnexionActivity.this);
         }
         // Fonction événementielle
         cmdValider_clic () ;
@@ -68,9 +69,22 @@ public class ConnexionActivity extends AppCompatActivity implements Serializable
                 tab.put("login", login);
                 tab.put("password", password);
                 // Tentative d'identification
+                Log.d("CMD_VALIDER", "PASSAGE OK") ;
+                pd = new ProgressDialog (ConnexionActivity.this) ;
+                pd.setMessage("Connexion en cours...");
+                pd.show () ;
                 controle.identifierUtilisateurDistant(tab, ConnexionActivity.this);
                 return ;
             }
         });
+    }
+
+    /**
+     * Termine le chargement
+     */
+    public void endChargement () {
+        if (pd!=null && pd.isShowing()) {
+            pd.dismiss() ;
+        }
     }
 }

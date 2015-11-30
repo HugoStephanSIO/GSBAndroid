@@ -1,5 +1,6 @@
 package fr.hugya.gsbandroid.controleur;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -12,6 +13,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -23,6 +26,7 @@ import fr.hugya.gsbandroid.modele.AccesDistant;
 import fr.hugya.gsbandroid.modele.AccesLocal;
 import fr.hugya.gsbandroid.modele.FraisHf;
 import fr.hugya.gsbandroid.modele.FraisMois;
+import fr.hugya.gsbandroid.vue.ConnexionActivity;
 import fr.hugya.gsbandroid.vue.MenuActivity;
 
 /**
@@ -77,8 +81,6 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
             // Mise à jour du statut de la connexion et des logs actuel de l'utilisateur
             estCo = true ;
             id = accesLocal.getId() ;
-            // Synchronisation descendante
-            syncDown(context);
         }
 	}
 
@@ -130,10 +132,17 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
     }
     /**
      * Fonction qui récupére les données de frais de l'utilisateur
-     * - implique une connexion au préalable
      * @param context
      */
     public void syncDown (Context context) {
+        if (id.size()!=3) { // L'utilisateur n'est pas connecté
+            Log.d("Erreur Controleur", "id.size() != 3 while must be");
+            return;
+        }
+        List list = new ArrayList <>() ;
+        list.add(id.get("id")) ;
+        this.app = ((AppCompatActivity)context) ;
+        accesDistant.envoiDistant("recupLesFrais", new JSONArray(list));
     }
     /**
      * Fonction qui envoie les données enregistrées localement à la base distante
@@ -144,6 +153,8 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
         this.modif = false ;
         app.finish() ;
         app.startActivity(app.getIntent()) ;
+        // Lancement d'une boite de dialogue de chargement
+        //startChargement("Synchronisation en cours...", context);
         // Récupération de ce qui est enregistré en local ??? NECESSAIRE ???
         recupererLocal(context);
         // Enregistrement du contexte
@@ -203,6 +214,108 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
         list.add(montant) ;
         // Envoie de la requête de suppression
         accesDistant.envoiDistant("supprFraisHF", new JSONArray(list)); ;
+    }
+    /**
+     * Fonction qui traite les données récupérées depuis le serveur distant pour les mettre en forme dans la Hashtable listFraisMois
+     * et enregistrement en local
+     * @param lesDonnees
+     */
+    public void recupererFraisDistant (JSONArray lesDonnees) {
+        // Variables pour simplifier la compréhension de la manipulation des données JSON recup
+        JSONObject jObj ;
+        Integer v_key ;
+        Integer v_annee ;
+        Integer v_mois ;
+        String v_typeFrais ;
+        Integer v_qte ;
+        try {
+            Integer l = lesDonnees.length() ; // TAG_DEBUG
+            Log.d("LENGTH", l.toString()) ; // TAG_DEBUG
+            // On parcourt toutes les lignes du tableau
+            for (int i = 0;i<lesDonnees.length();i++) {
+                // On récupére la ligne courante
+                jObj = lesDonnees.getJSONObject(i) ;
+                Log.d ("JOBJ", jObj.toString()) ; // TAG_DEBUG
+                // On remplit les différents variables
+                v_key = jObj.getInt("mois") ;
+                v_annee = Integer.parseInt(v_key.toString().substring(0, 4)) ;
+                v_mois = Integer.parseInt(v_key.toString().substring(4, 6)) ;
+                v_typeFrais = jObj.getString("idFraisForfait") ;
+                v_qte = jObj.getInt("quantite") ;
+                if (!listFraisMois.containsKey(v_key)) {
+                    Log.d("listFraisMois", "MOIS INTROUVABLE") ;
+                    // Creation du mois et de l'annee s'ils n'existent pas déjà
+                    listFraisMois.put(v_key, new FraisMois(v_annee, v_mois)) ;
+                }
+                // Switch selon le type de frais à enregistrer
+                if (v_typeFrais.equals("REP")) {
+                    listFraisMois.get(v_key).setRepas(v_qte);
+                } else if (v_typeFrais.equals("NUI")) {
+                    listFraisMois.get(v_key).setNuitee(v_qte);
+                } else if (v_typeFrais.equals("KM")) {
+                    listFraisMois.get(v_key).setKm(v_qte);
+                } else if (v_typeFrais.equals("ETP")) {
+                    listFraisMois.get(v_key).setEtape(v_qte);
+                }
+                Log.d("LISTFRAISMOIS", listFraisMois.toString()) ; // TAG_DEBUG
+            }
+        } catch (JSONException e) { // Si pour une raison quelconque le JSON est illisible
+            // Affichage de l'erreur et récupération des infos en local
+            Log.d("Erreur JSON : ",e.getMessage()) ;
+            this.recupererLocal(app);
+            return ;
+        }
+        // On enregistre la liste des frais fraichement récupérée en local
+        this.enregistrerLocal(app);
+        // On remet la modif à false car l'enregistrement local s'est fait à partir des données distantes, tout est donc à jour
+        modif = false ;
+        // On envoie la requête de récupération des frais hors forfaits
+        List list = new ArrayList <>() ;
+        list.add(id.get("id")) ;
+        accesDistant.envoiDistant("recupLesFraisHF", new JSONArray(list));
+    }
+    /**
+     * Fonction qui traite les données récupérées depuis le serveur distant pour les mettre en forme FraisHf dans le dictionnaire
+     * de frais Hashtable <Integer,FraisMois>
+     * @param lesDonnees
+     */
+    public void recupererFraisHFDistant (JSONArray lesDonnees) {
+        // Variables pour simplifier la compréhension de la manipulation des données JSON recup
+        JSONObject jObj ;
+        Integer v_key ;
+        String v_libelle ;
+        String v_date ;
+        Integer v_jour ;
+        Integer v_montant ;
+        FraisHf fHF ;
+        try {
+            // On parcourt toutes les lignes du tableau
+            for (int i = 0;i<lesDonnees.length();i++) {
+                // On remplit les différents variables
+                jObj = lesDonnees.getJSONObject(i) ;
+                v_key = jObj.getInt("mois") ;
+                v_libelle = jObj.getString("libelle") ;
+                v_date = jObj.getString("date") ;
+                v_montant = jObj.getInt("montant") ;
+                v_jour = Integer.parseInt(v_date.substring(8)) ;
+                fHF = new FraisHf(v_montant, v_libelle, v_jour) ;
+                // Creation du frais hors forfait s'il n'existe pas déjà
+                if (!listFraisMois.get(v_key).getLesFraisHF().contains(fHF)) {
+                    listFraisMois.get(v_key).getLesFraisHF().add(fHF) ;
+                }
+                Log.d("FraisHF", fHF.toString ()) ; // TAG_DEBUG
+            }
+        } catch (JSONException e) {
+            Log.d("Erreur JSON : ", e.getMessage()) ;
+            this.recupererLocal(app) ;
+            return ;
+        }
+        // On enregistre l'état des frais en local, on remet modif
+        this.enregistrerLocal(app) ;
+        // On remet la modif à false car l'enregistrement local s'est fait à partir des données distantes, tout est donc à jour
+        modif = false ;
+        ((ConnexionActivity)app).endChargement() ;
+        this.retourMenu (app) ;
     }
 
 
@@ -285,7 +398,6 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
     public void changeAfficheDate(DatePicker datePicker) {
         //try {
         DatePicker dp_mes = datePicker;
-
         int year    = dp_mes.getYear();
         int month   = dp_mes.getMonth();
         int day     = dp_mes.getDayOfMonth();
@@ -295,7 +407,6 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
             public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
             }
         });
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
             int daySpinnerId = Resources.getSystem().getIdentifier("day", "id", "android");
             if (daySpinnerId != 0)
@@ -306,7 +417,6 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
                     daySpinner.setVisibility(View.GONE);
                 }
             }
-
             int monthSpinnerId = Resources.getSystem().getIdentifier("month", "id", "android");
             if (monthSpinnerId != 0)
             {
@@ -316,7 +426,6 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
                     monthSpinner.setVisibility(View.VISIBLE);
                 }
             }
-
             int yearSpinnerId = Resources.getSystem().getIdentifier("year", "id", "android");
             if (yearSpinnerId != 0)
             {
@@ -346,7 +455,6 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
                         e.printStackTrace();
                     }
                 }
-
                 if(field.getName().equals("mMonthPicker") || field.getName().equals("mMonthSpinner"))
                 {
                     field.setAccessible(true);
@@ -363,7 +471,6 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
                         e.printStackTrace();
                     }
                 }
-
                 if(field.getName().equals("mYearPicker") || field.getName().equals("mYearSpinner"))
                 {
                     field.setAccessible(true);
@@ -387,6 +494,7 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
      * Affiche un message Toast
      */
     public void message (String message) {
+        // Nécessite au préalable d'avoir rempli le champ app du controleur
         Toast.makeText(app, message, Toast.LENGTH_SHORT).show() ;
     }
     /**
@@ -400,5 +508,21 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
         // Ouverture de la nouvelle activité, fermeture de la précédente
         a.startActivity(monIntent);
         a.finish() ;
+    }
+    /**
+     * Fonction qui déconnecte l'utilisateur :
+     * - suppression des données locale
+     * - retour page connexion
+     */
+    public void deconnexion () {
+        // On vide les variables locales
+        listFraisMois = null ;
+        id = null ;
+        // On vide les fichiers enregistrés en local
+        accesLocal.viderLocal(app) ;
+        // Retour page de connexion
+        Intent monIntent = new Intent(app, ConnexionActivity.class) ;
+        app.startActivity(monIntent) ;
+        app.finish() ;
     }
 }

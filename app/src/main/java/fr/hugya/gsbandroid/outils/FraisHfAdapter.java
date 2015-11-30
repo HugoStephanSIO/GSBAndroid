@@ -143,7 +143,7 @@ public class FraisHfAdapter extends BaseAdapter implements Serializable{
                 };
                 // Affichage de la boite de dialogue
                 AlertDialog.Builder ab = new AlertDialog.Builder(context);
-                ab.setMessage("Voulez vous vraiment supprimer ce frais hors forfait ?")
+                ab.setMessage("Voulez vous vraiment supprimer ce frais ? (il sera supprimé également de la base de donnée distante)")
                                                         .setPositiveButton("Oui", dialogClickListener)
                                                         .setNegativeButton("Non", dialogClickListener)
                                                         .show();

@@ -18,8 +18,8 @@ public class AccesLocal implements Serializable {
     // PROPRIETES :
     // ------------
     // Fichier contenant les informations sérialisées
-    private final String bddLocalFilename = "Frais.gsb" ;
-    private final String authenticationFilename = "Profil.gsb" ;
+    private final String bddLocalFilename = "localData.gsb" ;
+    private final String authenticationFilename = "localUser.gsb" ;
     private Hashtable<String,String> id ;
     public Hashtable<String,String> getId () { return id ; }
     private boolean estCo ;
@@ -77,7 +77,15 @@ public class AccesLocal implements Serializable {
      */
     public void enregistrerUtilisateurLocal(Context context, Hashtable<String,String> profil) {
         // Enregistrement de l'utilisateur en local
-        Log.d("id = ", profil.get("id")) ; // DEBUG
+        Log.d("id = ", profil.get("id")) ; // TAG_DEBUG
         Serializer.serialize(authenticationFilename,profil, context);
+    }
+    /**
+     * Vide les données locales et l'utilisateur local
+     * @param context
+     */
+    public void viderLocal (Context context) {
+        Serializer.serialize(authenticationFilename,null, context);
+        Serializer.serialize(authenticationFilename,null, context);
     }
 }

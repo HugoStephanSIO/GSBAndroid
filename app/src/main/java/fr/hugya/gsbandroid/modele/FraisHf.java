@@ -51,4 +51,12 @@ public class FraisHf  implements Serializable {
 		list.add(jour.toString()) ;
 		return list ;
 	}
+	/**
+	 * Retourne une version chaîne de caractère du frais hors forfait
+	 * TAG_DEBUG
+	 * @return
+	 */
+	public String toString () {
+		return "Frais Hors Forfait-- Jour: "+jour+" / Montant: "+montant+ " / Motif: "+motif ;
+	}
 }

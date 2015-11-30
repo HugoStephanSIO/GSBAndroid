@@ -45,6 +45,7 @@ public class MenuActivity extends AppCompatActivity implements Serializable {
         cmdMenu_clic(((Button)findViewById(R.id.cmdNuitee)), NuitActivity.class) ;
         cmdMenu_clic(((Button)findViewById(R.id.cmdEtape)), EtapeActivity.class) ;
         cmdTransfert_clic() ;
+        cmdDeconnexion_clic() ;
 
         // Si des modifs ont été faites en locales et nécessitent une syncUp, on affiche un message
         if (controle.getModif()) {
@@ -85,10 +86,21 @@ public class MenuActivity extends AppCompatActivity implements Serializable {
     private void cmdTransfert_clic() {
     	findViewById(R.id.cmdTransfert).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                controle.setApp(MenuActivity.this) ;
-                controle.syncUp(MenuActivity.this) ;
-                Toast.makeText(MenuActivity.this,"Synchronisation effectuée",Toast.LENGTH_SHORT) ;
+                controle.setApp(MenuActivity.this);
+                controle.syncUp(MenuActivity.this);
+                //Toast.makeText(MenuActivity.this, "Synchronisation effectuée", Toast.LENGTH_SHORT);
             }
         }) ;
+    }
+    /**
+     * Fonction événementielle appelée en cas de clic sur le bouton de déconnexion
+     */
+    private void cmdDeconnexion_clic() {
+        findViewById(R.id.cmdDeconnexion).setOnClickListener(new Button.OnClickListener() {
+                public void onClick(View v) {
+                    controle.setApp(MenuActivity.this) ;
+                    controle.deconnexion() ;
+                }
+        });
     }
 }
