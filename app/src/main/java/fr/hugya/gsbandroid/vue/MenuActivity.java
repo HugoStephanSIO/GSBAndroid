@@ -1,8 +1,10 @@
 package fr.hugya.gsbandroid.vue;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -21,6 +23,9 @@ public class MenuActivity extends AppCompatActivity implements Serializable {
     // PROPRIETES :
     // ------------
     private Controleur controle ;
+    private ProgressDialog pDial ;
+    private final String CLASS_TAG = this.getClass().getName() ;
+    private boolean charging = false ;
 
 
     // FONCTIONS REDEFINIES :
@@ -72,11 +77,11 @@ public class MenuActivity extends AppCompatActivity implements Serializable {
     	button.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 // Transmission du controleur à l'activité secondaire
-                Intent intent = new Intent(MenuActivity.this, classe) ;
-                intent.putExtra("ctrl", controle) ;
+                Intent intent = new Intent(MenuActivity.this, classe);
+                intent.putExtra("ctrl", controle);
                 // Ouverture de l'activité
-                startActivity(intent) ;
-                finish() ;
+                startActivity(intent);
+                finish();
             }
         }) ;
     }
@@ -86,9 +91,9 @@ public class MenuActivity extends AppCompatActivity implements Serializable {
     private void cmdTransfert_clic() {
     	findViewById(R.id.cmdTransfert).setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
+                startChargement();
                 controle.setApp(MenuActivity.this);
                 controle.syncUp(MenuActivity.this);
-                //Toast.makeText(MenuActivity.this, "Synchronisation effectuée", Toast.LENGTH_SHORT);
             }
         }) ;
     }
@@ -97,10 +102,47 @@ public class MenuActivity extends AppCompatActivity implements Serializable {
      */
     private void cmdDeconnexion_clic() {
         findViewById(R.id.cmdDeconnexion).setOnClickListener(new Button.OnClickListener() {
-                public void onClick(View v) {
-                    controle.setApp(MenuActivity.this) ;
-                    controle.deconnexion() ;
-                }
+            public void onClick(View v) {
+                controle.setApp(MenuActivity.this);
+                controle.deconnexion();
+            }
         });
+    }
+
+
+    // FONCTIONS OUTILS/AUTRES :
+    // -------------------------
+    /**
+     * Fonction qui initie un chargement (de synchronisation) via une ProgressDialog
+     */
+    public void startChargement () {
+        if (!charging) { // WEIRD ISN'T IT
+            Log.d(CLASS_TAG, "start Chargement");
+            pDial = new ProgressDialog(MenuActivity.this);
+            pDial.setMessage("Synchronisation en cours...");
+            pDial.show();
+            charging = true ;
+        }
+    }
+    /**
+     * Fonction qui met fin à un éventuel chargement en cours
+     */
+    public void endChargement () {
+        Log.d(CLASS_TAG, "endChargement") ;
+        if(pDial != null && pDial.isShowing()) {
+            Log.d(CLASS_TAG, "pDial!=null&showing") ;
+            pDial.dismiss() ;
+            pDial = null ;
+            charging = false ;
+        }
+    }
+    /**
+     * Fonction rafraîchit l'affichage de l'activité pour mettre à jour le message de modif
+     */
+    public void refresh () {
+        Intent intent = getIntent();
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(intent);
     }
 }

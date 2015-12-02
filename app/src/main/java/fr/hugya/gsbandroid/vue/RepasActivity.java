@@ -22,7 +22,7 @@ import fr.hugya.gsbandroid.controleur.Controleur;
 public class RepasActivity extends AppCompatActivity implements Serializable {
     // PROPRIETES :
     // ------------
-    // informations affichées dans l'activity
+    // Informations affichées dans l'activity
     private int annee ;
     private int mois ;
     private int qte ;

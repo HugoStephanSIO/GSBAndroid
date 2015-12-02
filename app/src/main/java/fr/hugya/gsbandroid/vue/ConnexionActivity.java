@@ -24,7 +24,7 @@ public class ConnexionActivity extends AppCompatActivity implements Serializable
     // PROPRIETES :
     // ------------
     private Controleur controle ;
-    private ProgressDialog pd;
+    private ProgressDialog pDial ;
 
 
     // FONCTIONS REDEFINIES :
@@ -41,6 +41,7 @@ public class ConnexionActivity extends AppCompatActivity implements Serializable
         // Création du controleur qui vérifie si un profil a été enregistré en local
         controle = new Controleur (ConnexionActivity.this) ;
         if (controle.estCo()) { // Si oui on ouvre directement le menu
+            startChargement();
             controle.syncDown (ConnexionActivity.this);
         }
         // Fonction événementielle
@@ -69,22 +70,30 @@ public class ConnexionActivity extends AppCompatActivity implements Serializable
                 tab.put("login", login);
                 tab.put("password", password);
                 // Tentative d'identification
-                Log.d("CMD_VALIDER", "PASSAGE OK") ;
-                pd = new ProgressDialog (ConnexionActivity.this) ;
-                pd.setMessage("Connexion en cours...");
-                pd.show () ;
+                startChargement();
                 controle.identifierUtilisateurDistant(tab, ConnexionActivity.this);
-                return ;
             }
         });
     }
 
+
+    // FONCTIONS OUTILS/AUTRES :
+    // -------------------------
     /**
-     * Termine le chargement
+     * Fonction qui commence un chargement (de connexion) avec une ProgressDialog
+     */
+    public void startChargement () {
+        pDial = new ProgressDialog(ConnexionActivity.this);
+        pDial.setMessage("Connexion en cours...");
+        pDial.show();
+    }
+    /**
+     * Fonction qui termine l'éventuel chargement en cours
      */
     public void endChargement () {
-        if (pd!=null && pd.isShowing()) {
-            pd.dismiss() ;
+        if(pDial != null && pDial.isShowing()) {
+            pDial.dismiss();
+            pDial = null ;
         }
     }
 }

@@ -16,6 +16,7 @@ import java.io.StreamCorruptedException;
  * @author Emds
  */
 public abstract class Serializer {
+	private static final String CLASS_TAG = Serializer.class.getName() ;
 	/**
 	 * Sérialisation d'un objet
 	 * @param filename
@@ -56,11 +57,11 @@ public abstract class Serializer {
 					ois.close() ;
 					return object ;
 				} catch (ClassNotFoundException e) {
-					Log.d("Erreur deSerialize", e.getMessage()) ;
+					Log.d(CLASS_TAG, "Erreur deSerialize : " + e.getMessage()) ;
 					return null ;
 				}
 			} catch (Exception e) {
-				Log.d("Erreur deSerialize", e.getMessage()) ;
+				Log.d(CLASS_TAG, "Erreur deSerialize : " + e.getMessage()) ;
 				return null ;
 			}
 		} catch (FileNotFoundException e) {

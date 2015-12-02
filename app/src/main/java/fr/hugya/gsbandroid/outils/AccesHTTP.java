@@ -16,6 +16,8 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import fr.hugya.gsbandroid.controleur.Controleur;
+
 /**
  * Classe utilitaire, de type thread qui s'éxécute en parallèle (AsyncThread) de façon à ne pas interrompre le processus principal,
  * pour simplifier l'accès aux pages PHP et donc à la BDD distante
@@ -27,6 +29,7 @@ public class AccesHTTP extends AsyncTask<String, Integer, Long> {
 	public String ret="";
 	private ArrayList<NameValuePair> parametres;
 	public AsyncResponse delegate=null;
+    private final String CLASS_TAG = this.getClass().getName() ;
 
 
 	// CONSTRUCTEURS :
@@ -53,7 +56,7 @@ public class AccesHTTP extends AsyncTask<String, Integer, Long> {
 	 * @return
 	 */
 	@Override
-	protected Long doInBackground(String... urls) {
+	protected Long doInBackground(String... urls)  {
 		HttpClient cnxHttp = new DefaultHttpClient();
 		HttpPost paramCnx = new HttpPost(urls[0]);
 		// Tentative de connexion
@@ -63,9 +66,10 @@ public class AccesHTTP extends AsyncTask<String, Integer, Long> {
 			ret = EntityUtils.toString(reponse.getEntity());
 
 		} catch (ClientProtocolException e) {
-			Log.d("Erreur ClientProtocol", e.toString()) ;
-		} catch (IOException e) {
-			Log.d("Erreur IOException", e.toString()) ;
+			Log.d(CLASS_TAG, "Erreur ClientProtocol : " + e.toString()) ;
+		} catch (IOException e) { // Connexion refusée
+			Log.d(CLASS_TAG, "Erreur IOException : " + e.toString());
+            Controleur.erreurConnexion = "Connexion au serveur " + urls[0] + " impossible !" ;
 		}
 		return null;
 	}

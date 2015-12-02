@@ -77,7 +77,6 @@ public class AccesLocal implements Serializable {
      */
     public void enregistrerUtilisateurLocal(Context context, Hashtable<String,String> profil) {
         // Enregistrement de l'utilisateur en local
-        Log.d("id = ", profil.get("id")) ; // TAG_DEBUG
         Serializer.serialize(authenticationFilename,profil, context);
     }
     /**

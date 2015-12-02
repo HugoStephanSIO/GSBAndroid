@@ -1,6 +1,5 @@
 package fr.hugya.gsbandroid.controleur;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -38,6 +37,10 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
     // ------------
     // Compteur de threads de connexion actifs
     public static Integer nbReqEnCours = 0 ; // PAS PROPRE ?
+    // Message d'erreur de connexion
+    public static String erreurConnexion = "" ; // PAS PROPRE
+    // Log tag
+    private final String CLASS_TAG = this.getClass().getName() ;
 	// Objet d'accès local
 	private AccesLocal accesLocal ;
 	// Objet d'accès distant
@@ -136,7 +139,7 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
      */
     public void syncDown (Context context) {
         if (id.size()!=3) { // L'utilisateur n'est pas connecté
-            Log.d("Erreur Controleur", "id.size() != 3 while must be");
+            Log.d(CLASS_TAG, "id.size() != 3 while must be");
             return;
         }
         List list = new ArrayList <>() ;
@@ -151,10 +154,8 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
     public void syncUp (Context context) {
         // Remise à false de l'indicateur de modif locales à enregistrer en distant
         this.modif = false ;
-        app.finish() ;
-        app.startActivity(app.getIntent()) ;
         // Lancement d'une boite de dialogue de chargement
-        //startChargement("Synchronisation en cours...", context);
+        ((MenuActivity) app).startChargement();
         // Récupération de ce qui est enregistré en local ??? NECESSAIRE ???
         recupererLocal(context);
         // Enregistrement du contexte
@@ -163,7 +164,7 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
         accesDistant.setId(id) ;
         // La synchronisation montante implique d'être identifié en utilisateur distant et donc d'avoir récupérer l'id distant
         if (id.size()!=3) {
-            Log.d("Erreur Controleur", "id.size() != 3 while must be") ;
+            Log.d(CLASS_TAG, "id.size() != 3 while must be") ;
             return ;
         }
         // Déclaration des deux listes qui seront remplies plusieurs fois dans la double boucle
@@ -213,7 +214,7 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
         list.add(jour) ;
         list.add(montant) ;
         // Envoie de la requête de suppression
-        accesDistant.envoiDistant("supprFraisHF", new JSONArray(list)); ;
+        accesDistant.envoiDistant("supprFraisHF", new JSONArray(list));
     }
     /**
      * Fonction qui traite les données récupérées depuis le serveur distant pour les mettre en forme dans la Hashtable listFraisMois
@@ -229,13 +230,10 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
         String v_typeFrais ;
         Integer v_qte ;
         try {
-            Integer l = lesDonnees.length() ; // TAG_DEBUG
-            Log.d("LENGTH", l.toString()) ; // TAG_DEBUG
             // On parcourt toutes les lignes du tableau
             for (int i = 0;i<lesDonnees.length();i++) {
                 // On récupére la ligne courante
                 jObj = lesDonnees.getJSONObject(i) ;
-                Log.d ("JOBJ", jObj.toString()) ; // TAG_DEBUG
                 // On remplit les différents variables
                 v_key = jObj.getInt("mois") ;
                 v_annee = Integer.parseInt(v_key.toString().substring(0, 4)) ;
@@ -243,25 +241,28 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
                 v_typeFrais = jObj.getString("idFraisForfait") ;
                 v_qte = jObj.getInt("quantite") ;
                 if (!listFraisMois.containsKey(v_key)) {
-                    Log.d("listFraisMois", "MOIS INTROUVABLE") ;
                     // Creation du mois et de l'annee s'ils n'existent pas déjà
                     listFraisMois.put(v_key, new FraisMois(v_annee, v_mois)) ;
                 }
                 // Switch selon le type de frais à enregistrer
-                if (v_typeFrais.equals("REP")) {
-                    listFraisMois.get(v_key).setRepas(v_qte);
-                } else if (v_typeFrais.equals("NUI")) {
-                    listFraisMois.get(v_key).setNuitee(v_qte);
-                } else if (v_typeFrais.equals("KM")) {
-                    listFraisMois.get(v_key).setKm(v_qte);
-                } else if (v_typeFrais.equals("ETP")) {
-                    listFraisMois.get(v_key).setEtape(v_qte);
+                switch (v_typeFrais) {
+                    case "REP":
+                        listFraisMois.get(v_key).setRepas(v_qte);
+                        break;
+                    case "NUI":
+                        listFraisMois.get(v_key).setNuitee(v_qte);
+                        break;
+                    case "KM":
+                        listFraisMois.get(v_key).setKm(v_qte);
+                        break;
+                    case "ETP":
+                        listFraisMois.get(v_key).setEtape(v_qte);
+                        break;
                 }
-                Log.d("LISTFRAISMOIS", listFraisMois.toString()) ; // TAG_DEBUG
             }
         } catch (JSONException e) { // Si pour une raison quelconque le JSON est illisible
             // Affichage de l'erreur et récupération des infos en local
-            Log.d("Erreur JSON : ",e.getMessage()) ;
+            Log.d(CLASS_TAG, "Erreur JSON : "+e.getMessage()) ;
             this.recupererLocal(app);
             return ;
         }
@@ -271,7 +272,7 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
         modif = false ;
         // On envoie la requête de récupération des frais hors forfaits
         List list = new ArrayList <>() ;
-        list.add(id.get("id")) ;
+        list.add(id.get("id"));
         accesDistant.envoiDistant("recupLesFraisHF", new JSONArray(list));
     }
     /**
@@ -303,19 +304,18 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
                 if (!listFraisMois.get(v_key).getLesFraisHF().contains(fHF)) {
                     listFraisMois.get(v_key).getLesFraisHF().add(fHF) ;
                 }
-                Log.d("FraisHF", fHF.toString ()) ; // TAG_DEBUG
             }
         } catch (JSONException e) {
-            Log.d("Erreur JSON : ", e.getMessage()) ;
+            Log.d(CLASS_TAG, "Erreur JSON : " + e.getMessage()) ;
             this.recupererLocal(app) ;
             return ;
         }
-        // On enregistre l'état des frais en local, on remet modif
+        // On enregistre l'état des frais en local
         this.enregistrerLocal(app) ;
         // On remet la modif à false car l'enregistrement local s'est fait à partir des données distantes, tout est donc à jour
         modif = false ;
-        ((ConnexionActivity)app).endChargement() ;
-        this.retourMenu (app) ;
+        endChargement();
+        this.retourMenu(app) ;
     }
 
 
@@ -383,7 +383,7 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
                     qte = listFraisMois.get(key).getEtape();
                     break;
                 default :
-                    Log.d("ERREUR", "Type de frais non reconnu") ;
+                    Log.d(CLASS_TAG, "Type de frais non reconnu") ;
                     qte = -1 ;
                     break ;
             }
@@ -503,6 +503,10 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
      */
     public void retourMenu (AppCompatActivity a) {
         // Transmission du controleur en argument
+        if (app != null) {
+            endChargement() ;
+        }
+        app = null ;
         Intent monIntent = new Intent(a, MenuActivity.class) ;
         monIntent.putExtra("ctrl", this) ;
         // Ouverture de la nouvelle activité, fermeture de la précédente
@@ -524,5 +528,30 @@ public class Controleur implements Serializable { // Serializable pour pouvoir �
         Intent monIntent = new Intent(app, ConnexionActivity.class) ;
         app.startActivity(monIntent) ;
         app.finish() ;
+    }
+    /**
+     * Fonction qui termine le chargement (progressDialog) s'il y en a un de commencé
+     */
+    public void endChargement() {
+        if (app instanceof ConnexionActivity) { // Si c'est un chargement de connexion
+            ((ConnexionActivity) app).endChargement();
+        } else if (app instanceof MenuActivity) { // Si c'est un chargement de synchronisation
+            ((MenuActivity) app).endChargement();
+        } else {
+            Log.d (CLASS_TAG, "Type de classe de chargement non reconnu") ;
+        }
+    }
+    /**
+     * Fonction qui rafraichit l'affichage du menu pour mettre à jour l'état du message de modif
+     */
+    public void refreshMenu() {
+        if (app==null) {
+            Log.d(CLASS_TAG, " error null app");
+            return ;
+        }
+        if (app instanceof MenuActivity) { // On vérifie que l'activité courante est bien le menu
+            modif = false ;
+            ((MenuActivity)app).refresh () ;
+        }
     }
 }
